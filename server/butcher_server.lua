@@ -26,6 +26,21 @@ end)
 
 --------------------------------------------< FRESH CHICKEN START >--------------------------------------
 
+--give butcher knife
+RegisterNetEvent('lusty94_butcher:server:GiveButcherKnife', function()
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)        
+        Player.Functions.AddItem("butcherknife", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["butcherknife"], "add")
+end)
+--give food packaging
+RegisterNetEvent('lusty94_butcher:server:GiveFoodPackaging', function()
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)        
+        Player.Functions.AddItem("foodpackaging", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "add")
+end)
+
 --pick fresh chicken
 RegisterNetEvent('lusty94_butcher:server:PickChicken', function()
     local src = source
@@ -54,6 +69,8 @@ end)
 RegisterNetEvent('lusty94_butcher:server:PluckChicken', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)        
+        Player.Functions.RemoveItem("freshchicken", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["freshchicken"], "remove")
         Player.Functions.AddItem("pluckedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["pluckedchicken"], "add")
 end)
@@ -79,7 +96,9 @@ end)
 --pluck chicken
 RegisterNetEvent('lusty94_butcher:server:ProcessChicken', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)        
+    local Player = QBCore.Functions.GetPlayer(src)
+    Player.Functions.RemoveItem("pluckedchicken", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["pluckedchicken"], "remove")        
         Player.Functions.AddItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "add")
 end)
@@ -104,52 +123,52 @@ end)
 
 
 --chicken breast
-RegisterNetEvent('lusty94_butcher:server:ChickenBreast', function()
+RegisterNetEvent('lusty94_butcher:server:ProcessChickenBreast', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)        
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")
-        Player.Functions.AddItem("chickenbreast", 1)
+        Player.Functions.AddItem("chickenbreast", 2)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreast"], "add")
 end)
 
 --chicken thighs
-RegisterNetEvent('lusty94_butcher:server:ChickenThighs', function()
+RegisterNetEvent('lusty94_butcher:server:ProcessChickenThighs', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")        
-        Player.Functions.AddItem("chickenthighs", 1)
+        Player.Functions.AddItem("chickenthighs", 2)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighs"], "add")
 end)
 
 --chicken wings
-RegisterNetEvent('lusty94_butcher:server:ChickenWings', function()
+RegisterNetEvent('lusty94_butcher:server:ProcessChickenWings', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")        
-        Player.Functions.AddItem("chickenwings", 1)
+        Player.Functions.AddItem("chickenwings", 2)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwings"], "add")
 end)
 
 --chicken drumsticks
-RegisterNetEvent('lusty94_butcher:server:ChickenDrumsticks', function()
+RegisterNetEvent('lusty94_butcher:server:ProcessChickenDrumSticks', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")          
-        Player.Functions.AddItem("chickendrumsticks", 1)
+        Player.Functions.AddItem("chickendrumsticks", 2)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumsticks"], "add")
 end)
 
 --chicken legs
-RegisterNetEvent('lusty94_butcher:server:ChickenLegs', function()
+RegisterNetEvent('lusty94_butcher:server:ProcessChickenLegs', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src) 
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")         
-        Player.Functions.AddItem("chickenlegs", 1)
+        Player.Functions.AddItem("chickenlegs", 2)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegs"], "add")
 end)
 
@@ -170,7 +189,7 @@ end)
 
 
 --chicken breast pack
-RegisterNetEvent('lusty94_butcher:server:ChickenBreastPack', function()
+RegisterNetEvent('lusty94_butcher:server:PackChickenBreast', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src) 
         Player.Functions.RemoveItem("chickenbreast", 1)
@@ -198,7 +217,7 @@ end)
 
 
 --chicken thighs pack
-RegisterNetEvent('lusty94_butcher:server:ChickenThighsPack', function()
+RegisterNetEvent('lusty94_butcher:server:PackChickenThighs', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src) 
         Player.Functions.RemoveItem("chickenthighs", 1)
@@ -214,9 +233,9 @@ end)
 QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenWings', function(source, cb)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    local thigh = Player.Functions.GetItemByName("chickenwings")
+    local wings = Player.Functions.GetItemByName("chickenwings")
     local packaging = Player.Functions.GetItemByName("foodpackaging")
-    if thigh ~= nil and packaging ~= nil then
+    if wings ~= nil and packaging ~= nil then
         cb(true)
     else
         cb(false)
@@ -225,7 +244,7 @@ end)
 
 
 --chicken wings pack
-RegisterNetEvent('lusty94_butcher:server:ChickenWingsPack', function()
+RegisterNetEvent('lusty94_butcher:server:PackChickenWings', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src) 
         Player.Functions.RemoveItem("chickenwings", 1)
@@ -241,9 +260,9 @@ end)
 QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenDrumsticks', function(source, cb)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    local thigh = Player.Functions.GetItemByName("chickendrumsticks")
+    local drumsticks = Player.Functions.GetItemByName("chickendrumsticks")
     local packaging = Player.Functions.GetItemByName("foodpackaging")
-    if thigh ~= nil and packaging ~= nil then
+    if drumsticks ~= nil and packaging ~= nil then
         cb(true)
     else
         cb(false)
@@ -252,7 +271,7 @@ end)
 
 
 --chicken drumsticks pack
-RegisterNetEvent('lusty94_butcher:server:ChickenDrumsticksPack', function()
+RegisterNetEvent('lusty94_butcher:server:PackChickenDrumSticks', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src) 
         Player.Functions.RemoveItem("chickendrumsticks", 1)
@@ -261,6 +280,32 @@ RegisterNetEvent('lusty94_butcher:server:ChickenDrumsticksPack', function()
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
         Player.Functions.AddItem("chickendrumstickspack", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumstickspack"], "add")
+end)
+
+--chicken legs & packaging callback
+QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenLegs', function(source, cb)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    local legs = Player.Functions.GetItemByName("chickenlegs")
+    local packaging = Player.Functions.GetItemByName("foodpackaging")
+    if legs ~= nil and packaging ~= nil then
+        cb(true)
+    else
+        cb(false)
+    end
+end)
+
+
+--chicken legs pack
+RegisterNetEvent('lusty94_butcher:server:PackChickenLegs', function()
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src) 
+        Player.Functions.RemoveItem("chickenlegs", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegs"], "remove")         
+        Player.Functions.RemoveItem("foodpackaging", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
+        Player.Functions.AddItem("chickenlegspack", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegspack"], "add")
 end)
 ------------------------------------------------------------< CHICKEN PARTS END >--------------------------------------------------
 
@@ -285,7 +330,7 @@ RegisterNetEvent('lusty94_butcher:server:SellChickenBreastPack', function()
     local Player = QBCore.Functions.GetPlayer(src)
     local price = Config.ItemPrices.SellItems["chickenbreastpack"] 
 
-        Player.Functions.AddItem("chickenbreastpack", 1)
+        Player.Functions.RemoveItem("chickenbreastpack", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreastpack"], "remove")
 
         if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
@@ -313,7 +358,7 @@ RegisterNetEvent('lusty94_butcher:server:SellChickenThighsPack', function()
     local Player = QBCore.Functions.GetPlayer(src)
     local price = Config.ItemPrices.SellItems["chickenthighspack"] 
 
-        Player.Functions.AddItem("chickenthighspack", 1)
+        Player.Functions.RemoveItem("chickenthighspack", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighspack"], "remove")
 
         if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
@@ -336,12 +381,12 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenWingsPack', function
 end)
 
 --sell chicken wings pack
-RegisterNetEvent('lusty94_butcher:server:SellChickenwWingsPack', function()
+RegisterNetEvent('lusty94_butcher:server:SellChickenWingsPack', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local price = Config.ItemPrices.SellItems["chickenwingspack"] 
 
-        Player.Functions.AddItem("chickenwingspack", 1)
+        Player.Functions.RemoveItem("chickenwingspack", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwingspack"], "remove")
 
         if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
@@ -352,7 +397,7 @@ RegisterNetEvent('lusty94_butcher:server:SellChickenwWingsPack', function()
 end)
 
 --chicken drumsticks pack callback
-QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenDrumsticksPack', function(source, cb)
+QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenDrumSticksPack', function(source, cb)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local pack = Player.Functions.GetItemByName("chickendrumstickspack")
@@ -364,13 +409,41 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenDrumsticksPack', fun
 end)
 
 --sell chicken drumsticks pack
-RegisterNetEvent('lusty94_butcher:server:SellChickenwDrumsticksPack', function()
+RegisterNetEvent('lusty94_butcher:server:SellChickenDrumSticksPack', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local price = Config.ItemPrices.SellItems["chickendrumstickspack"] 
 
-        Player.Functions.AddItem("chickendrumstickspack", 1)
+        Player.Functions.RemoveItem("chickendrumstickspack", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumstickspack"], "remove")
+
+        if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
+            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price, "sold-butcher-items")
+        elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
+            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+        end
+end)
+
+--chicken legs pack callback
+QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenLegsPack', function(source, cb)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    local pack = Player.Functions.GetItemByName("chickenlegspack")
+    if pack ~= nil then
+        cb(true)
+    else
+        cb(false)
+    end
+end)
+
+--sell chicken legs pack
+RegisterNetEvent('lusty94_butcher:server:SellChickenLegsPack', function()
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    local price = Config.ItemPrices.SellItems["chickenlegspack"] 
+
+        Player.Functions.RemoveItem("chickenlegspack", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegspack"], "remove")
 
         if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
             Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price, "sold-butcher-items")

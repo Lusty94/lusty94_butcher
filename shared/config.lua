@@ -3,6 +3,7 @@ Config = {}
 
 Config.DebugPoly = true
 Config.PrintDebugInformation = true
+Config.UseToggleDutyCommand = true -- used for debugging only as allows you to toggle duty anywhere
 
 
 
@@ -12,8 +13,6 @@ Config.CoreSettings = {
     },
     EventNames = {        
         BossMenu = 'qb-bossmenu:client:OpenMenu', -- NAME OF BOSS MENU EVENT TO OPEN MANAGEMENT MENU
-        Fuel = 'LegacyFuel', -- NAME OF HUD EVENT TO RELIEVE STRESS
-        Keys = 'vehiclekeys:client:SetOwner', -- NAME OF HUD EVENT TO RELIEVE STRESS
         Clothing = 'qb-clothing:client:openOutfitMenu', -- clothing menu event to open outfit locker
     },
     Target = {
@@ -24,9 +23,10 @@ Config.CoreSettings = {
         --use 'custom' for custom target 
     },
     Notify = {
-        Type = 'qb', -- notification type, support for qb-core notify, okokNotify and boii_ui notify
+        Type = 'qb', -- notification type, support for qb-core notify, okokNotify, mythic_notify and boii_ui notify
         --use 'qb' for default qb-core notify
         --use 'okok' for okokNotify
+        --use 'mythic' for myhthic_notify
         --use 'boii' for boii_ui notify
         Sound = true, -- use sound for OKOK notifications ONLY
         Length = {
@@ -35,7 +35,7 @@ Config.CoreSettings = {
         },
     },    
     Menu = {
-        Type = 'qb', -- menu script name, support for qb-menu, jixel-menu, boii_ui menu and ox_lib context menu
+        Type = 'ox', -- menu script name, support for qb-menu, jixel-menu, boii_ui menu and ox_lib context menu
         --EDIT MENUS.LUA TO ADD YOUR OWN CUSTOM MENU SCRIPT 
         --use 'qb' for qb-menu
         --use 'jixel' for jixel-menu
@@ -47,9 +47,9 @@ Config.CoreSettings = {
         Times = {
             TimeToPickChicken = 5000, -- time it takes to pick a chicken
             TimeToPluckChicken = 5000, -- time it takes to pluck a chicken
-            TimeToProcessChicken = 5000, -- time it takes to process a chicken
-            TimeToPackChicken = 5000, -- time it takes to pack a chicken
-            TimeToLoadTruck = 5000, -- time it takes to load delivery truck
+            TimeToProcessChicken = 5000, -- time it takes to process a chicken and process into packs also
+            TimeToPackChicken = 5000, -- time it takes to pack chicken products
+            TimeToSellChicken = 5000, -- time it takes to sell chicken
         },
     },
 }
@@ -69,7 +69,7 @@ Config.InteractionLocations = {
                 MaxZ = 32,
                 Icon = '',
                 Label = 'Toggle Duty',
-                Size = vec3(1.5,1.5,1), -- only used for ox_target
+                Size = vec3(2.0,1.0,1), -- only used for ox_target
             },
         },
         BossMenu = {
@@ -82,7 +82,7 @@ Config.InteractionLocations = {
                 MaxZ = 32,
                 Icon = '',
                 Label = 'Open Management Menu',
-                Size = vec3(1.5,1.5,1), -- only used for ox_target
+                Size = vec3(2.0,1.0,1), -- only used for ox_target
             },
         },
         ClothingLockers = {
@@ -95,27 +95,7 @@ Config.InteractionLocations = {
                 MaxZ = 32,
                 Icon = '',
                 Label = 'Change Clothing',
-                Size = vec3(1.5,1.5,1), -- only used for ox_target
-            },
-            Clothing = {
-                ['male'] = {
-                    outfitData ={
-                        ['t-shirt'] = {item = 15, texture = 0},
-                        ['torso2'] = {item = 345, texture = 0},
-                        ['arms'] = {item = 19, texture = 0},
-                        ['pants'] = {item = 3, texture = 7},
-                        ['shoes'] = {item = 1, texture = 0},
-                    }
-                },
-                ['female'] = {
-                    outfitData ={
-                        ['t-shirt'] = {item = 14, texture = 0},
-                        ['torso2'] = {item = 370, texture = 0},
-                        ['arms'] = {item = 0, texture = 0},
-                        ['pants'] = {item = 0, texture = 12},
-                        ['shoes'] = {item = 1, texture = 0},
-                    }
-                },
+                Size = vec3(5.0,1.0,1), -- only used for ox_target
             },
         },
     },
@@ -142,47 +122,60 @@ Config.InteractionLocations = {
                 MinZ = 30,
                 MaxZ = 32,
                 Icon = '',
-                Label = 'Pluck Chicken',
-                Size = vec3(1.5,1.5,1), -- only used for ox_target
+                Label = 'Pluck Fresh Chicken',
+                Size = vec3(3.0,1.5,1), -- only used for ox_target
             },
         },
-        ProcessChicken = {
+        PrepareChicken = {
             Location = {
-                Location = vector3(-78.83, 6228.78, 31.33),
+                Location = vector3(-79.03, 6228.83, 31.08),
                 Width = 2.5,
                 Height = 2.0,
                 Heading = 123.13,
                 MinZ = 30,
                 MaxZ = 32,
                 Icon = '',
-                Label = 'Process Chicken',
-                Size = vec3(1.5,1.5,1), -- only used for ox_target
+                Label = 'Process Plucked Chicken',
+                Size = vec3(2.5,2.0,1), -- only used for ox_target
             },
         },
-        PackChicken = {
+        ProcessChicken = {
             Location = {
-                Location = vector3(-102.0, 6208.79, 31.33),
-                Width = 5.0,
-                Height = 1.5,
+                Location = vector3(-99.79, 6210.99, 31.03),
+                Width = 2.5,
+                Height = 2.0,
                 Heading = 43.63,
                 MinZ = 30,
                 MaxZ = 32,
                 Icon = '',
-                Label = 'Pack Chicken',
-                Size = vec3(1.5,1.5,1), -- only used for ox_target
+                Label = 'Prepare Processed Chicken',
+                Size = vec3(2.5,2.0,1), -- only used for ox_target
             },
         },
-        LoadChicken = {
+        PackChicken = {
             Location = {
-                Location = vector3(-173.7, 6175.17, 31.27),
-                Width = 5.0,
-                Height = 1.5,
+                Location = vector3(-103.98, 6206.8, 31.03),
+                Width = 2.5,
+                Height = 2.0,
                 Heading = 43.63,
+                MinZ = 30,
+                MaxZ = 32,
+                Icon = '',
+                Label = 'Pack Fresh Chicken Products',
+                Size = vec3(2.5,2.0,1), -- only used for ox_target
+            },
+        },
+        SellChicken = {
+            Location = {
+                Location = vector3(-111.57, 6195.84, 31.03),
+                Width = 4.0,
+                Height = 1.5,
+                Heading = 136.02,
                 MinZ = 30,
                 MaxZ = 34,
                 Icon = '',
-                Label = 'Load Delivery Truck',
-                Size = vec3(1.5,1.5,1), -- only used for ox_target
+                Label = 'Sell Fresh Chicken Products',
+                Size = vec3(4.0,1.5,4), -- only used for ox_target
             },
         },
     },
@@ -225,21 +218,22 @@ Config.ItemPrices = {
     
 
     PaymentAccounts = {
-        PaymentType = 'personal', -- set to 'personal' to pay the player money or set to 'society' to pay the job society money when selling items
-        AccountUsedToSell = 'bank', -- if set to 'personal' use either 'cash' or 'bank'
+        PaymentType = 'society', -- set to 'personal' to pay the player money or set to 'society' to pay the job society money when selling items
+        AccountUsedToSell = 'cash', -- if set to 'personal' use either 'cash' or 'bank'
     },
 
+
     SellItems = {
-        ["chickenbreast"] =  7, -- price of EACH fish
-        ["chickenthighs"] =  5, -- price of EACH fish
-        ["chickenwings"] =  3, -- price of EACH fish
-        ["chickendrumsticks"] =  5, -- price of EACH fish
-        ["chickenlegs"] =  5, -- price of EACH fish
-        ["chickenbreastpack"] =  5, -- price of EACH fish
-        ["chickenthighpack"] =  5, -- price of EACH fish
-        ["chickenwingpack"] =  5, -- price of EACH fish
-        ["chickendrumstickpack"] =  5, -- price of EACH fish
-        ["chickenlegspack"] =  5, -- price of EACH fish
+        ["chickenbreast"] =  7, -- price of EACH item
+        ["chickenthighs"] =  5, -- price of EACH item
+        ["chickenwings"] =  3, -- price of EACH item
+        ["chickendrumsticks"] =  5, -- price of EACH item
+        ["chickenlegs"] =  5, -- price of EACH item
+        ["chickenbreastpack"] =  14, -- price of EACH item
+        ["chickenthighspack"] =  10, -- price of EACH item
+        ["chickenwingspack"] =  8, -- price of EACH item
+        ["chickendrumstickspack"] =  10, -- price of EACH item
+        ["chickenlegspack"] =  10, -- price of EACH item
     },
 }
 
@@ -250,19 +244,19 @@ Config.Animations = {
         anim = "base_female",
     },
     PluckChicken = {
-        dict = "",
-        anim = "",
+        dict = "amb@prop_human_parking_meter@female@base",
+        anim = "base_female",
     },
     ProcessChicken = {
-        dict = "",
-        anim = "",
+        dict = "amb@prop_human_parking_meter@female@base",
+        anim = "base_female",
     },
     PackChicken = {
-        dict = "",
-        anim = "",
+        dict = "amb@prop_human_parking_meter@female@base",
+        anim = "base_female",
     },
-    LoadTruck = {
-        dict = "",
-        anim = "",
+    SellChicken = {
+        dict = "amb@prop_human_parking_meter@female@base",
+        anim = "base_female",
     },
 }
