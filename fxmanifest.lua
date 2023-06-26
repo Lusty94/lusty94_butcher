@@ -30,7 +30,7 @@ shared_scripts {
 }
 
 escrow_ignore {
-    'shared/config.lua',
-    'shared/targets.lua',
-    'shared/menus.lua',
+    'client/**.lua',
+    'server/**.lua',
+    'shared/**.lua',
 }
