@@ -78,7 +78,8 @@ SELL WHAT YOU HAVE MADE FOR CASH OR BANK OR EVEN BACK TO THE SOCIETY ACCOUNT YOU
 
 
 
-```make sure to add the required job to your core/shared/job.lua EDIT PAYMENTS AND NAMES FOR JOB TITLES TO SUIT YOUR SERVER
+```
+make sure to add the required job to your core/shared/job.lua EDIT PAYMENTS AND NAMES FOR JOB TITLES TO SUIT YOUR SERVER
 
 ```
 
