@@ -3,13 +3,13 @@
 ------README------
 ```
 
-```Lusty94_Fishing - A fishing script for QB-Core with 21 different types of fish to be caught.```
-
-```Multiple changes can be made to the script via the config.lua file such as sale prices, tackle shop locations and much more```
-
-```Choose between progressbar, skillbar and ps-ui when fishing```
 
 
+LUSTY94_BUTCHER - A SIMPLE BUTCHER JOB SCRIPT FOR QB-CORE BASED AT THE CLUCKIN' BELL FACTORY IN PALETO BAY
+
+PICK FRESH CHICKEN, PLUCK THEM, PROCESS THEM AND THEN PREPARE THEM FOR DELIVERY INTO VARIOUS PACKS
+
+SELL WHAT YOU HAVE MADE FOR CASH OR BANK OR EVEN BACK TO THE SOCIETY ACCOUNT YOU ARE EMPLOYED BY!
 
 
 
@@ -30,26 +30,7 @@
 
 ``progressbar: https://github.com/qbcore-framework/progressbar``
 
-``LegacyFuel: https://github.com/InZidiuZ/LegacyFuel``
-
-
-```
------REQUIRED IF USING PS-UI FOR MINIGAME-----
-```
-
-``PS-UI: https://github.com/Project-Sloth/ps-ui``
-
-```
------REQUIRED IF USING SKILLBAR FOR MINIGAME-----
-```
-
-``skillbar: https://github.com/qbcore-framework/qb-skillbar``
-
-
-
-
-
-
+``qb-menu: https://github.com/qbcore-framework/qb-menu``
 
 
 
@@ -61,7 +42,7 @@
 ```
 
 
-``MAKE SURE TO INSTALL ALL NECCESSARY DEPENDENCIES AND ENSURE THEY START BEFORE LUSTY94_FISHING IN YOUR SERVER.CFG FILE``
+``MAKE SURE TO INSTALL ALL NECCESSARY DEPENDENCIES AND ENSURE THEY START BEFORE LUSTY94_BUTCHER IN YOUR SERVER.CFG FILE``
 
 	
 ``Insert [images] into inventory/html/images``
@@ -74,33 +55,60 @@
 
 
 ```
---fishing tackle
-	['fishingrod'] 						 = {['name'] = 'fishingrod', 			 	  	['label'] = 'Fishing Rod', 	    ['weight'] = 1000, 		['type'] = 'item', 		['image'] = 'fishingrod.png', 				    ['unique'] = true, 	    ['useable'] = true, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Fishing Rod'},
-	['bait'] 							 = {['name'] = 'bait', 			 	  	  	    ['label'] = 'Bait', 		    ['weight'] = 200, 		['type'] = 'item', 		['image'] = 'bait.png', 					    ['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fishing Bait Used To Catch Fish'},
-	['anchor'] 							 = {['name'] = 'anchor', 			 	  	  	['label'] = 'Anchor', 		    ['weight'] = 2500, 		['type'] = 'item', 		['image'] = 'anchor.png', 					    ['unique'] = false, 	['useable'] = true, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'An Anchor For A Fishing Boat'},
+['butcherknife'] 						 	= {['name'] = 'butcherknife', 			 	  	  		['label'] = 'Butcher Knife', 				['weight'] = 200, 		['type'] = 'item', 					['image'] = 'butcherknife.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Sharp Knife Used By Butchers'},
+	['foodpackaging'] 						 	= {['name'] = 'foodpackaging', 			 	  	  		['label'] = 'Food Packaging', 				['weight'] = 200, 		['type'] = 'item', 					['image'] = 'foodpackaging.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Packaging Used For Raw Foods'},
 
-	
-	--fish
-	['shad'] 						 = {['name'] = 'shad', 			 	  	  			['label'] = 'Shad', 			['weight'] = 200, 		['type'] = 'item', 		['image'] = 'shad.png', 						['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Small Shad'},
-	['gizzardshad'] 				 = {['name'] = 'gizzardshad', 			 	  	  	['label'] = 'Gizzard Shad', 	['weight'] = 200, 		['type'] = 'item', 		['image'] = 'gizzardshad.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Small Gizzard Shad'},
-	['smallmouthbass'] 				 = {['name'] = 'smallmouthbass', 			 	  	['label'] = 'Smallmouth Bass', 	['weight'] = 400, 		['type'] = 'item', 		['image'] = 'smallmouthbass.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Small Mouth Bass'},
-	['largemouthbass'] 				 = {['name'] = 'largemouthbass', 			 	  	['label'] = 'Largemouth Bass', 	['weight'] = 400, 		['type'] = 'item', 		['image'] = 'largemouthbass.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Large Mouth Bass'},
-	['bluegill'] 				 	 = {['name'] = 'bluegill', 			 	  	  		['label'] = 'Blue Gill', 		['weight'] = 200, 		['type'] = 'item', 		['image'] = 'bluegill.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Blue Gill'},
-	['spottedsunfish'] 				 = {['name'] = 'spottedsunfish', 			 	  	['label'] = 'Spotted Sunfish', 	['weight'] = 200, 		['type'] = 'item', 		['image'] = 'spottedsunfish.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Spotted Sunfish'},
-	['blackcrappie'] 				 = {['name'] = 'blackcrappie', 			 	  	  	['label'] = 'Black Crappie', 	['weight'] = 300, 		['type'] = 'item', 		['image'] = 'blackcrappie.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Black Crappie'},
-	['stripedbass'] 				 = {['name'] = 'stripedbass', 			 	  	  	['label'] = 'Striped Bass', 	['weight'] = 400, 		['type'] = 'item', 		['image'] = 'stripedbass.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Striped Bass'},
-	['bluecatfish'] 				 = {['name'] = 'bluecatfish', 			 	  	  	['label'] = 'Blue Catfish', 	['weight'] = 400, 		['type'] = 'item', 		['image'] = 'bluecatfish.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Blue Catfish'},
-	['flatheadcatfish'] 			 = {['name'] = 'flatheadcatfish', 			 	  	['label'] = 'Flathead Catfish', ['weight'] = 400, 		['type'] = 'item', 		['image'] = 'flatheadcatfish.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Flathead Catfish'},
-	['channelcatfish'] 				 = {['name'] = 'channelcatfish', 			 	  	['label'] = 'channel Catfish', 	['weight'] = 400, 		['type'] = 'item', 		['image'] = 'channelcatfish.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Channel Catfish'},
-	['yellowbullhead'] 				 = {['name'] = 'yellowbullhead', 			 	  	['label'] = 'Yellow Bullhead', 	['weight'] = 500, 		['type'] = 'item', 		['image'] = 'yellowbullhead.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Yellow Bullhead'},
-	['rainbowtrout'] 				 = {['name'] = 'rainbowtrout', 			 	  	  	['label'] = 'Rainbow Trout', 	['weight'] = 400, 		['type'] = 'item', 		['image'] = 'rainbowtrout.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Rainbow Trout'},
-	['browntrout'] 				 	 = {['name'] = 'browntrout', 			 	  	  	['label'] = 'Brown Trout', 		['weight'] = 400, 		['type'] = 'item', 		['image'] = 'browntrout.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Brown Trout'},
-	['chainpickerel'] 				 = {['name'] = 'chainpickerel', 			 	  	['label'] = 'Chain Pickerel', 	['weight'] = 800, 		['type'] = 'item', 		['image'] = 'chainpickerel.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Chain Pickerel'},
-	['redfinpickerel'] 				 = {['name'] = 'redfinpickerel', 			 	  	['label'] = 'Redfin Pickerel', 	['weight'] = 800, 		['type'] = 'item', 		['image'] = 'redfinpickerel.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Redfin Pickerel'},
-	['bowfin'] 				 		 = {['name'] = 'bowfin', 			 	  	  		['label'] = 'Bowfin', 			['weight'] = 400, 		['type'] = 'item', 		['image'] = 'bowfin.png', 						['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Bowfin'},
-	['longnosegar'] 				 = {['name'] = 'longnosegar', 			 	  	  	['label'] = 'LongNose Gar', 	['weight'] = 800, 		['type'] = 'item', 		['image'] = 'longnosegar.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Long Nose Gar'},
-	['walleye'] 				     = {['name'] = 'walleye', 			 	  	  		['label'] = 'Walleye', 			['weight'] = 400, 		['type'] = 'item', 		['image'] = 'walleye.png', 						['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Walleye'},
-	['sturgeon'] 				 	 = {['name'] = 'sturgeon', 			 	  	  		['label'] = 'Sturgeon', 		['weight'] = 1000, 		['type'] = 'item', 		['image'] = 'sturgeon.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Sturgeon'},
-	['bullshark'] 				 	 = {['name'] = 'bullshark', 			 	  	  	['label'] = 'Bull Shark', 		['weight'] = 1500, 		['type'] = 'item', 		['image'] = 'bullshark.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Bull Shark'},
-	['greatwhiteshark'] 			 = {['name'] = 'greatwhiteshark', 			 	  	['label'] = 'Great white Shark',['weight'] = 2000, 		['type'] = 'item', 		['image'] = 'greatwhite.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'A Great White Shark'},
+	['freshchicken'] 						 	= {['name'] = 'freshchicken', 			 	  	  		['label'] = 'Fresh Chicken', 				['weight'] = 200, 		['type'] = 'item', 					['image'] = 'freshchicken.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken Ready For Plucking'},
+	['pluckedchicken'] 						 	= {['name'] = 'pluckedchicken', 			 	  	  	['label'] = 'Plucked Chicken', 				['weight'] = 200, 		['type'] = 'item', 					['image'] = 'pluckedchicken.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Plucked Chicken Ready For Processing'},
+	['processedchicken'] 						= {['name'] = 'processedchicken', 			 	  	  	['label'] = 'Processed Chicken', 			['weight'] = 200, 		['type'] = 'item', 					['image'] = 'processedchicken.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Processed Chicken Ready For Packing'},
+    
+	['chickenbreast'] 						 	= {['name'] = 'chickenbreast', 			 	  	  		['label'] = 'Chicken Breast', 				['weight'] = 200, 		['type'] = 'item', 					['image'] = 'chickenbreast.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken Breast Ready For Packing'},
+	['chickenthighs'] 						 	= {['name'] = 'chickenthighs', 			 	  	  		['label'] = 'Chicken Thighs', 				['weight'] = 200, 		['type'] = 'item', 					['image'] = 'chickenthighs.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken Thighs Ready For Packing'},
+	['chickenwings'] 						 	= {['name'] = 'chickenwings', 			 	  	  		['label'] = 'Chicken wings', 				['weight'] = 200, 		['type'] = 'item', 					['image'] = 'chickenwings.png', 					['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken Wings Ready For Packing'},
+	['chickendrumsticks'] 						= {['name'] = 'chickendrumsticks', 			 	  	  	['label'] = 'Chicken Drumsticks', 			['weight'] = 200, 		['type'] = 'item', 					['image'] = 'chickendrumsticks.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken Drumsticks Ready For Packing'},
+	['chickenlegs'] 						    = {['name'] = 'chickenlegs', 			 	  	  	    ['label'] = 'Chicken Legs', 			    ['weight'] = 200, 		['type'] = 'item', 					['image'] = 'chickenlegs.png', 				        ['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken Legs Ready For Packing'},
+    
+	['chickenbreastpack'] 						= {['name'] = 'chickenbreastpack', 			 	  	    ['label'] = 'Chicken Breast Pack', 			['weight'] = 200, 		['type'] = 'item', 					['image'] = 'chickenbreastpack.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken Breast Pack Ready For Delivery'},
+	['chickenthighspack'] 						= {['name'] = 'chickenthighspack', 			 	  	  	['label'] = 'Chicken Thighs Pack', 			['weight'] = 200, 		['type'] = 'item', 					['image'] = 'chickenthighspack.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken Thighs Pack Ready For Delivery'},
+	['chickenwingspack'] 						= {['name'] = 'chickenwingspack', 			 	  	  	['label'] = 'Chicken wings Pack', 			['weight'] = 200, 		['type'] = 'item', 					['image'] = 'chickenwingspack.png', 				['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken wings Pack Ready For Delivery'},
+	['chickendrumstickspack'] 					= {['name'] = 'chickendrumstickspack', 			 	  	['label'] = 'Chicken Drumsticks Pack', 		['weight'] = 200, 		['type'] = 'item', 					['image'] = 'chickendrumstickspack.png', 			['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken Drumsticks Pack Ready For Delivery'},
+	['chickenlegspack'] 					    = {['name'] = 'chickenlegspack', 			 	  	    ['label'] = 'Chicken Legs Pack', 		    ['weight'] = 200, 		['type'] = 'item', 					['image'] = 'chickenlegspack.png', 			        ['unique'] = false, 	['useable'] = false, 	['shouldClose'] = true,   ['combinable'] = nil,   ['description'] = 'Fresh Chicken Legs Pack Ready For Delivery'},
 
+```
+
+
+
+```make sure to add the required job to your core/shared/job.lua EDIT PAYMENTS AND NAMES FOR JOB TITLES TO SUIT YOUR SERVER
+
+```
+
+['butcher'] = {
+        label = 'Clucking Bell Butcher',
+        defaultDuty = false,
+        offDutyPay = false,
+        grades = {
+            ['0'] = {
+                name = 'Apprentice Butcher',
+                payment = 50
+            },
+            ['1'] = {
+                name = 'Novice Butcher',
+                payment = 50
+            },
+            ['2'] = {
+                name = 'Professional Butcher',
+                payment = 50
+            },
+            ['3'] = {
+                name = 'Senior Butcher',
+                payment = 50
+            },
+            ['4'] = {
+                name = 'Butchery Owner',
+                isboss = true,
+                payment = 50
+            },
+        },
+    },
+
+```

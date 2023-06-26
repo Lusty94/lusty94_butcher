@@ -1,27 +1,6 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
 
-local function CheckVersion()
-	PerformHttpRequest('https://raw.githubusercontent.com/Lusty94/UpdatedVersions/main/Butcher/version.txt', function(err, newestVersion, headers)
-		local currentVersion = GetResourceMetadata(GetCurrentResourceName(), 'version')
-		if not newestVersion then print("Currently unable to run a version check.") return end
-		local advice = "^1You are currently running an outdated version^7, ^1please update^7"
-		if newestVersion:gsub("%s+", "") == currentVersion:gsub("%s+", "") then advice = '^6You are running the latest version.^7'
-		else print("^3Version Check^7: ^2Current^7: "..currentVersion.." ^2Latest^7: "..newestVersion.." "..advice) end
-		--print(advice)
-	end)
-end
-CheckVersion()
-
-
---<!>-- SERVER PRINT --<!>--
-AddEventHandler('onResourceStart', function(resourceName)
-    if (GetCurrentResourceName() ~= resourceName) then
-      return
-    end
-        print('^5--<^3!^5>-- ^7Lusty94 ^5| ^5--<^3!^5>-- ^5Butcher V1.0.0 Started Successfully ^5--<^3!^5>--^7')
-end)
-
 
 
 --------------------------------------------< FRESH CHICKEN START >--------------------------------------
@@ -37,7 +16,7 @@ end)
 RegisterNetEvent('lusty94_butcher:server:GiveFoodPackaging', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)        
-        Player.Functions.AddItem("foodpackaging", 1)
+        Player.Functions.AddItem("foodpackaging", 5)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "add")
 end)
 
@@ -58,7 +37,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:FreshChicken', function(sou
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local bird = Player.Functions.GetItemByName("freshchicken")
-    if bird ~= nil then
+    if bird then
         cb(true)
     else
         cb(false)
@@ -86,7 +65,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:PluckedChicken', function(s
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local bird = Player.Functions.GetItemByName("pluckedchicken")
-    if bird ~= nil then
+    if bird  then
         cb(true)
     else
         cb(false)
@@ -114,7 +93,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ProcessedChicken', function
     local Player = QBCore.Functions.GetPlayer(src)
     local bird = Player.Functions.GetItemByName("processedchicken")
     local knife = Player.Functions.GetItemByName("butcherknife")
-    if bird ~= nil and knife ~= nil then
+    if bird  and knife  then
         cb(true)
     else
         cb(false)
@@ -180,7 +159,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenBreast', function(so
     local Player = QBCore.Functions.GetPlayer(src)
     local breast = Player.Functions.GetItemByName("chickenbreast")
     local packaging = Player.Functions.GetItemByName("foodpackaging")
-    if breast ~= nil and packaging ~= nil then
+    if breast  and packaging  then
         cb(true)
     else
         cb(false)
@@ -208,7 +187,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenThighs', function(so
     local Player = QBCore.Functions.GetPlayer(src)
     local thigh = Player.Functions.GetItemByName("chickenthighs")
     local packaging = Player.Functions.GetItemByName("foodpackaging")
-    if thigh ~= nil and packaging ~= nil then
+    if thigh  and packaging  then
         cb(true)
     else
         cb(false)
@@ -235,7 +214,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenWings', function(sou
     local Player = QBCore.Functions.GetPlayer(src)
     local wings = Player.Functions.GetItemByName("chickenwings")
     local packaging = Player.Functions.GetItemByName("foodpackaging")
-    if wings ~= nil and packaging ~= nil then
+    if wings  and packaging  then
         cb(true)
     else
         cb(false)
@@ -262,7 +241,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenDrumsticks', functio
     local Player = QBCore.Functions.GetPlayer(src)
     local drumsticks = Player.Functions.GetItemByName("chickendrumsticks")
     local packaging = Player.Functions.GetItemByName("foodpackaging")
-    if drumsticks ~= nil and packaging ~= nil then
+    if drumsticks  and packaging  then
         cb(true)
     else
         cb(false)
@@ -288,7 +267,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenLegs', function(sour
     local Player = QBCore.Functions.GetPlayer(src)
     local legs = Player.Functions.GetItemByName("chickenlegs")
     local packaging = Player.Functions.GetItemByName("foodpackaging")
-    if legs ~= nil and packaging ~= nil then
+    if legs  and packaging  then
         cb(true)
     else
         cb(false)
@@ -317,7 +296,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenBreastPack', functio
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local pack = Player.Functions.GetItemByName("chickenbreastpack")
-    if pack ~= nil then
+    if pack  then
         cb(true)
     else
         cb(false)
@@ -345,7 +324,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenThighsPack', functio
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local pack = Player.Functions.GetItemByName("chickenthighspack")
-    if pack ~= nil then
+    if pack  then
         cb(true)
     else
         cb(false)
@@ -373,7 +352,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenWingsPack', function
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local pack = Player.Functions.GetItemByName("chickenwingspack")
-    if pack ~= nil then
+    if pack  then
         cb(true)
     else
         cb(false)
@@ -401,7 +380,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenDrumSticksPack', fun
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local pack = Player.Functions.GetItemByName("chickendrumstickspack")
-    if pack ~= nil then
+    if pack  then
         cb(true)
     else
         cb(false)
@@ -429,7 +408,7 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenLegsPack', function(
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local pack = Player.Functions.GetItemByName("chickenlegspack")
-    if pack ~= nil then
+    if pack  then
         cb(true)
     else
         cb(false)
@@ -457,6 +436,29 @@ end)
 
 
 ------------------------------------------------------------< SELLING END >--------------------------------------------------
+
+
+
+local function CheckVersion()
+	PerformHttpRequest('https://raw.githubusercontent.com/Lusty94/UpdatedVersions/main/Butcher/version.txt', function(err, newestVersion, headers)
+		local currentVersion = GetResourceMetadata(GetCurrentResourceName(), 'version')
+		if not newestVersion then print("Currently unable to run a version check.") return end
+		local advice = "^1You are currently running an outdated version^7, ^1please update^7"
+		if newestVersion:gsub("%s+", "") == currentVersion:gsub("%s+", "") then advice = '^6You are running the latest version.^7'
+		else print("^3Version Check^7: ^2Current^7: "..currentVersion.." ^2Latest^7: "..newestVersion.." "..advice) end
+		--print(advice)
+	end)
+end
+CheckVersion()
+
+
+--<!>-- SERVER PRINT --<!>--
+AddEventHandler('onResourceStart', function(resourceName)
+    if (GetCurrentResourceName() ~= resourceName) then
+      return
+    end
+        print('^5--<^3!^5>-- ^7Lusty94 ^5| ^5--<^3!^5>-- ^5Butcher V1.0.0 Started Successfully ^5--<^3!^5>--^7')
+end)
 
 
 

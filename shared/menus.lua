@@ -254,6 +254,8 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChickenMenu', function()
         exports['boii_ui']:open_menu('default', ProcessChickenMenu)
     elseif Config.CoreSettings.Menu.Type == 'ox' then
         lib.showContext('ProcessChickenMenu')
+    elseif Config.CoreSettings.Menu.Type == 'custom' then
+        --insert custom menu code here
     end
 end)
 
@@ -276,9 +278,9 @@ local PackChickenMenu = {
         {
             header = 'Get Food Packaging', -- Menu option header if header is being used
             header_icon = '<i class="fa-solid fa-box"></i>', -- Menu header icon if using one this can be removed if not
-            message = "Get Clean Food Packaging For Use",
+            message = "Get A Pack of 5",
             action_type = 'server_event', -- Type to trigger on click this can be removed. Actions: 'client_event', 'server_event'
-            action = 'lusty94_butcher:client:GiveFoodPackaging',  -- Name of event to trigger
+            action = 'lusty94_butcher:server:GiveFoodPackaging',  -- Name of event to trigger
             params = {}, -- Event params
             should_close = true, -- Toggle whether event should close the menu ui
             disabled = false -- Disable the onclick function of the option
@@ -347,11 +349,11 @@ local PackChickenMenu = {
 
 lib.registerContext({
     id = 'PackChickenMenu',
-    title = 'Pack Chicken Products For Sale!  Don\'t Forget Packaging',
+    title = 'Pack Chicken Products Ready For Sale!  Don\'t Forget Packaging',
     options = {
       {
         title = 'Get Food Packaging',
-        description = 'Get Clean Food Packaging For Use',
+        description = 'Get A Pack of 5',
         icon = 'box',
         onSelect = function()
             TriggerServerEvent('lusty94_butcher:server:GiveFoodPackaging')
@@ -407,7 +409,7 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenMenu', function()
             },
             {   
                 header = "Get Food Packaging",
-                txt = "Get Clean Food Packaging For Use",
+                txt = "Get A Pack of 5",
                 params = {
                     isServer = true,
                     event = "lusty94_butcher:server:GiveFoodPackaging",
@@ -464,7 +466,7 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenMenu', function()
             },  
             {   
                 header = "Get Food Packaging",
-                txt = "Get Clean Food Packaging For Use",
+                txt = "Get A Pack of 5",
                 params = {
                     isServer = true,
                     event = "lusty94_butcher:server:GiveFoodPackaging",
@@ -517,6 +519,8 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenMenu', function()
         exports['boii_ui']:open_menu('default', PackChickenMenu)
     elseif Config.CoreSettings.Menu.Type == 'ox' then
         lib.showContext('PackChickenMenu')
+    elseif Config.CoreSettings.Menu.Type == 'custom' then
+        --insert custom menu code here
     end
 end)
 
@@ -525,8 +529,6 @@ end)
 
 
 --------------------------------------------------------------< SELL CHICKEN MENU START >-----------------------------------------------------------------
-
-
 
 local SellChickenMenu = {
     main_header = { -- Main menu header
@@ -744,12 +746,9 @@ RegisterNetEvent('lusty94_butcher:client:SellChickenMenu', function()
         exports['boii_ui']:open_menu('default', SellChickenMenu)
     elseif Config.CoreSettings.Menu.Type == 'ox' then
         lib.showContext('SellChickenMenu')
+    elseif Config.CoreSettings.Menu.Type == 'custom' then
+        --insert custom menu code here
     end
 end)
-
-
-
-
-
 
 --------------------------------------------------------------< SELL CHICKEN MENU END >-----------------------------------------------------------------

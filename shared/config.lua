@@ -1,11 +1,26 @@
 Config = {}
 
+--
+--██╗░░░░░██╗░░░██╗░██████╗████████╗██╗░░░██╗░█████╗░░░██╗██╗
+--██║░░░░░██║░░░██║██╔════╝╚══██╔══╝╚██╗░██╔╝██╔══██╗░██╔╝██║
+--██║░░░░░██║░░░██║╚█████╗░░░░██║░░░░╚████╔╝░╚██████║██╔╝░██║
+--██║░░░░░██║░░░██║░╚═══██╗░░░██║░░░░░╚██╔╝░░░╚═══██║███████║
+--███████╗╚██████╔╝██████╔╝░░░██║░░░░░░██║░░░░█████╔╝╚════██║
+--╚══════╝░╚═════╝░╚═════╝░░░░╚═╝░░░░░░╚═╝░░░░╚════╝░░░░░░╚═╝
 
-Config.DebugPoly = true
-Config.PrintDebugInformation = true
-Config.UseToggleDutyCommand = true -- used for debugging only as allows you to toggle duty anywhere
+
+--Thank you for downloading this script!
+
+--Below you can change multiple options to suit your server needs.
 
 
+Config.DebugPoly = false -- displays polyzone locations
+Config.UseToggleDutyCommand = false -- used for debugging only as allows you to toggle duty anywhere
+
+--Blip Settings
+Config.Blips = {
+    {title = 'Cluckin Bell Butchers', colour = 5, id = 310, coords = vector3(-73.59, 6267.08, 31.32), scale = 0.7, useblip = true}, -- BLIP FOR VANILLA UNICORN
+}
 
 Config.CoreSettings = {
     Job = {
@@ -35,7 +50,7 @@ Config.CoreSettings = {
         },
     },    
     Menu = {
-        Type = 'ox', -- menu script name, support for qb-menu, jixel-menu, boii_ui menu and ox_lib context menu
+        Type = 'qb', -- menu script name, support for qb-menu, jixel-menu, boii_ui menu and ox_lib context menu
         --EDIT MENUS.LUA TO ADD YOUR OWN CUSTOM MENU SCRIPT 
         --use 'qb' for qb-menu
         --use 'jixel' for jixel-menu
@@ -67,7 +82,7 @@ Config.InteractionLocations = {
                 Heading = 30.94,
                 MinZ = 30,
                 MaxZ = 32,
-                Icon = '',
+                Icon = 'fa-solid fa-clipboard',
                 Label = 'Toggle Duty',
                 Size = vec3(2.0,1.0,1), -- only used for ox_target
             },
@@ -80,7 +95,7 @@ Config.InteractionLocations = {
                 Heading = 214.1,
                 MinZ = 30,
                 MaxZ = 32,
-                Icon = '',
+                Icon = 'fa-solid fa-users',
                 Label = 'Open Management Menu',
                 Size = vec3(2.0,1.0,1), -- only used for ox_target
             },
@@ -93,9 +108,9 @@ Config.InteractionLocations = {
                 Heading = 120.14,
                 MinZ = 30,
                 MaxZ = 32,
-                Icon = '',
+                Icon = 'fa-solid fa-shirt',
                 Label = 'Change Clothing',
-                Size = vec3(5.0,1.0,1), -- only used for ox_target
+                Size = vec3(5.0,1.0,2), -- only used for ox_target
             },
         },
     },
@@ -108,9 +123,9 @@ Config.InteractionLocations = {
                 Heading = 300.27,
                 MinZ = 30,
                 MaxZ = 32,
-                Icon = '',
+                Icon = 'fa-solid fa-hand-point-up',
                 Label = 'Pick Fresh Chicken',
-                Size = vec3(1.5,1.5,1), -- only used for ox_target
+                Size = vec3(1.5,1.5,1.5), -- only used for ox_target
             },
         },
         PluckChicken = {
@@ -121,7 +136,7 @@ Config.InteractionLocations = {
                 Heading = 120,
                 MinZ = 30,
                 MaxZ = 32,
-                Icon = '',
+                Icon = 'fa-solid fa-hand',
                 Label = 'Pluck Fresh Chicken',
                 Size = vec3(3.0,1.5,1), -- only used for ox_target
             },
@@ -134,7 +149,7 @@ Config.InteractionLocations = {
                 Heading = 123.13,
                 MinZ = 30,
                 MaxZ = 32,
-                Icon = '',
+                Icon = 'fa-solid fa-hand',
                 Label = 'Process Plucked Chicken',
                 Size = vec3(2.5,2.0,1), -- only used for ox_target
             },
@@ -147,7 +162,7 @@ Config.InteractionLocations = {
                 Heading = 43.63,
                 MinZ = 30,
                 MaxZ = 32,
-                Icon = '',
+                Icon = 'fa-solid fa-hand',
                 Label = 'Prepare Processed Chicken',
                 Size = vec3(2.5,2.0,1), -- only used for ox_target
             },
@@ -160,7 +175,7 @@ Config.InteractionLocations = {
                 Heading = 43.63,
                 MinZ = 30,
                 MaxZ = 32,
-                Icon = '',
+                Icon = 'fa-solid fa-box',
                 Label = 'Pack Fresh Chicken Products',
                 Size = vec3(2.5,2.0,1), -- only used for ox_target
             },
@@ -173,7 +188,7 @@ Config.InteractionLocations = {
                 Heading = 136.02,
                 MinZ = 30,
                 MaxZ = 34,
-                Icon = '',
+                Icon = 'fa-solid fa-money-bill',
                 Label = 'Sell Fresh Chicken Products',
                 Size = vec3(4.0,1.5,4), -- only used for ox_target
             },
@@ -218,22 +233,22 @@ Config.ItemPrices = {
     
 
     PaymentAccounts = {
-        PaymentType = 'society', -- set to 'personal' to pay the player money or set to 'society' to pay the job society money when selling items
+        PaymentType = 'personal', -- set to 'personal' to pay the player money or set to 'society' to pay the job society money when selling items
         AccountUsedToSell = 'cash', -- if set to 'personal' use either 'cash' or 'bank'
     },
 
 
     SellItems = {
-        ["chickenbreast"] =  7, -- price of EACH item
-        ["chickenthighs"] =  5, -- price of EACH item
-        ["chickenwings"] =  3, -- price of EACH item
-        ["chickendrumsticks"] =  5, -- price of EACH item
-        ["chickenlegs"] =  5, -- price of EACH item
-        ["chickenbreastpack"] =  14, -- price of EACH item
-        ["chickenthighspack"] =  10, -- price of EACH item
-        ["chickenwingspack"] =  8, -- price of EACH item
-        ["chickendrumstickspack"] =  10, -- price of EACH item
-        ["chickenlegspack"] =  10, -- price of EACH item
+        ["chickenbreast"] =  7, -- sale price of EACH item
+        ["chickenthighs"] =  5, -- sale price of EACH item
+        ["chickenwings"] =  3, -- sale price of EACH item
+        ["chickendrumsticks"] =  5, -- sale price of EACH item
+        ["chickenlegs"] =  5, -- sale price of EACH item
+        ["chickenbreastpack"] =  14, -- sale price of EACH item
+        ["chickenthighspack"] =  10, -- sale price of EACH item
+        ["chickenwingspack"] =  8, -- sale price of EACH item
+        ["chickendrumstickspack"] =  10, -- sale price of EACH item
+        ["chickenlegspack"] =  10, -- sale price of EACH item
     },
 }
 
