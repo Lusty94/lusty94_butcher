@@ -15,7 +15,7 @@ Config = {}
 
 
 Config.DebugPoly = false -- displays polyzone locations
-Config.UseToggleDutyCommand = false -- used for debugging only as allows you to toggle duty anywhere
+
 
 --Blip Settings
 Config.Blips = {
@@ -37,6 +37,11 @@ Config.CoreSettings = {
         --use 'ox' for ox_target
         --use 'custom' for custom target 
     },
+    Inventory = {
+        Type = 'qb', -- support for qb-inventory and ox_inventory
+        --use 'qb' for qb-inventory
+        --use 'ox' for ox_inventory
+    },
     Notify = {
         Type = 'qb', -- notification type, support for qb-core notify, okokNotify, mythic_notify and boii_ui notify
         --use 'qb' for default qb-core notify
@@ -50,11 +55,10 @@ Config.CoreSettings = {
         },
     },    
     Menu = {
-        Type = 'qb', -- menu script name, support for qb-menu, jixel-menu, boii_ui menu and ox_lib context menu
+        Type = 'qb', -- menu script name, support for qb-menu, jixel-menu and ox_lib context menu
         --EDIT MENUS.LUA TO ADD YOUR OWN CUSTOM MENU SCRIPT 
         --use 'qb' for qb-menu
         --use 'jixel' for jixel-menu
-        --use 'boii' for boii_ui-menu
         --use 'ox' for ox_lib context menu
         --use 'custom' for your own custom menu
     },
@@ -74,128 +78,18 @@ Config.CoreSettings = {
 
 Config.InteractionLocations = {
     JobAreas = {
-        Duty = {
-            Location = {
-                Location = vector3(-69.81, 6256.49, 31.09),
-                Width = 2.0,
-                Height = 1.0,
-                Heading = 30.94,
-                MinZ = 30,
-                MaxZ = 32,
-                Icon = 'fa-solid fa-clipboard',
-                Label = 'Toggle Duty',
-                Size = vec3(2.0,1.0,1), -- only used for ox_target
-            },
-        },
-        BossMenu = {
-            Location = {
-                Location = vector3(-67.34, 6253.57, 31.09),
-                Width = 2.0,
-                Height = 1.0,
-                Heading = 214.1,
-                MinZ = 30,
-                MaxZ = 32,
-                Icon = 'fa-solid fa-users',
-                Label = 'Open Management Menu',
-                Size = vec3(2.0,1.0,1), -- only used for ox_target
-            },
-        },
-        ClothingLockers = {
-            Location = {
-                Location = vector3(-75.64, 6250.66, 31.09),
-                Width = 5.0,
-                Height = 1.0,
-                Heading = 120.14,
-                MinZ = 30,
-                MaxZ = 32,
-                Icon = 'fa-solid fa-shirt',
-                Label = 'Change Clothing',
-                Size = vec3(5.0,1.0,2), -- only used for ox_target
-            },
-        },
+        Duty = { Location = { Location = vector3(-69.81, 6256.49, 31.09), Width = 2.0, Height = 1.0, Heading = 30.94, MinZ = 30, MaxZ = 32, Icon = 'fa-solid fa-clipboard', Label = 'Toggle Duty', Size = vec3(2.0,1.0,1), }, },
+        BossMenu = { Location = { Location = vector3(-67.34, 6253.57, 31.09), Width = 2.0, Height = 1.0, Heading = 214.1, MinZ = 30, MaxZ = 32, Icon = 'fa-solid fa-users', Label = 'Open Management Menu', Size = vec3(2.0,1.0,1), }, },
+        ClothingLockers = { Location = { Location = vector3(-75.64, 6250.66, 31.09), Width = 5.0, Height = 1.0, Heading = 120.14, MinZ = 30, MaxZ = 32, Icon = 'fa-solid fa-shirt', Label = 'Change Clothing', Size = vec3(5.0,1.0,2), }, },
     },
     Preparation = {
-        PickChicken = {
-            Location = {
-                Location = vector3(-66.2, 6247.98, 31.33),
-                Width = 1.5,
-                Height = 1.5,
-                Heading = 300.27,
-                MinZ = 30,
-                MaxZ = 32,
-                Icon = 'fa-solid fa-hand-point-up',
-                Label = 'Pick Fresh Chicken',
-                Size = vec3(1.5,1.5,1.5), -- only used for ox_target
-            },
-        },
-        PluckChicken = {
-            Location = {
-                Location = vector3(-89.33, 6234.58, 31.33),
-                Width = 3.0,
-                Height = 1.5,
-                Heading = 120,
-                MinZ = 30,
-                MaxZ = 32,
-                Icon = 'fa-solid fa-hand',
-                Label = 'Pluck Fresh Chicken',
-                Size = vec3(3.0,1.5,1), -- only used for ox_target
-            },
-        },
-        PrepareChicken = {
-            Location = {
-                Location = vector3(-79.03, 6228.83, 31.08),
-                Width = 2.5,
-                Height = 2.0,
-                Heading = 123.13,
-                MinZ = 30,
-                MaxZ = 32,
-                Icon = 'fa-solid fa-hand',
-                Label = 'Process Plucked Chicken',
-                Size = vec3(2.5,2.0,1), -- only used for ox_target
-            },
-        },
-        ProcessChicken = {
-            Location = {
-                Location = vector3(-99.79, 6210.99, 31.03),
-                Width = 2.5,
-                Height = 2.0,
-                Heading = 43.63,
-                MinZ = 30,
-                MaxZ = 32,
-                Icon = 'fa-solid fa-hand',
-                Label = 'Prepare Processed Chicken',
-                Size = vec3(2.5,2.0,1), -- only used for ox_target
-            },
-        },
-        PackChicken = {
-            Location = {
-                Location = vector3(-103.98, 6206.8, 31.03),
-                Width = 2.5,
-                Height = 2.0,
-                Heading = 43.63,
-                MinZ = 30,
-                MaxZ = 32,
-                Icon = 'fa-solid fa-box',
-                Label = 'Pack Fresh Chicken Products',
-                Size = vec3(2.5,2.0,1), -- only used for ox_target
-            },
-        },
-        SellChicken = {
-            Location = {
-                Location = vector3(-111.57, 6195.84, 31.03),
-                Width = 4.0,
-                Height = 1.5,
-                Heading = 136.02,
-                MinZ = 30,
-                MaxZ = 34,
-                Icon = 'fa-solid fa-money-bill',
-                Label = 'Sell Fresh Chicken Products',
-                Size = vec3(4.0,1.5,4), -- only used for ox_target
-            },
-        },
+        PickChicken = { Location = { Location = vector3(-66.2, 6247.98, 31.33), Width = 1.5, Height = 1.5, Heading = 300.27, MinZ = 30, MaxZ = 32, Icon = 'fa-solid fa-hand-point-up', Label = 'Pick Fresh Chicken', Size = vec3(1.5,1.5,1.5), }, },
+        PluckChicken = { Location = { Location = vector3(-89.33, 6234.58, 31.33), Width = 3.0, Height = 1.5, Heading = 120, MinZ = 30, MaxZ = 32, Icon = 'fa-solid fa-hand', Label = 'Pluck Fresh Chicken', Size = vec3(3.0,1.5,1), }, },
+        PrepareChicken = { Location = { Location = vector3(-79.03, 6228.83, 31.08), Width = 2.5, Height = 2.0, Heading = 123.13, MinZ = 30, MaxZ = 32, Icon = 'fa-solid fa-hand', Label = 'Process Plucked Chicken', Size = vec3(2.5,2.0,1), }, },
+        ProcessChicken = { Location = { Location = vector3(-99.79, 6210.99, 31.03), Width = 2.5, Height = 2.0, Heading = 43.63, MinZ = 30, MaxZ = 32, Icon = 'fa-solid fa-hand', Label = 'Prepare Processed Chicken', Size = vec3(2.5,2.0,1), }, },
+        PackChicken = { Location = { Location = vector3(-103.98, 6206.8, 31.03), Width = 2.5, Height = 2.0, Heading = 43.63, MinZ = 30, MaxZ = 32, Icon = 'fa-solid fa-box', Label = 'Pack Fresh Chicken Products', Size = vec3(2.5,2.0,1), }, },
+        SellChicken = { Location = { Location = vector3(-111.57, 6195.84, 31.03), Width = 4.0, Height = 1.5, Heading = 136.02, MinZ = 30, MaxZ = 34, Icon = 'fa-solid fa-money-bill', Label = 'Sell Fresh Chicken Products', Size = vec3(4.0,1.5,4), }, },
     },
-
-
 }
 
 
@@ -239,11 +133,6 @@ Config.ItemPrices = {
 
 
     SellItems = {
-        ["chickenbreast"] =  7, -- sale price of EACH item
-        ["chickenthighs"] =  5, -- sale price of EACH item
-        ["chickenwings"] =  3, -- sale price of EACH item
-        ["chickendrumsticks"] =  5, -- sale price of EACH item
-        ["chickenlegs"] =  5, -- sale price of EACH item
         ["chickenbreastpack"] =  14, -- sale price of EACH item
         ["chickenthighspack"] =  10, -- sale price of EACH item
         ["chickenwingspack"] =  8, -- sale price of EACH item
@@ -267,10 +156,6 @@ Config.Animations = {
         anim = "base_female",
     },
     PackChicken = {
-        dict = "amb@prop_human_parking_meter@female@base",
-        anim = "base_female",
-    },
-    SellChicken = {
         dict = "amb@prop_human_parking_meter@female@base",
         anim = "base_female",
     },

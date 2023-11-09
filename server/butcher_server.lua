@@ -1,5 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-
+local InvType = Config.CoreSettings.Inventory.Type
 
 
 
@@ -8,24 +8,36 @@ local QBCore = exports['qb-core']:GetCoreObject()
 --give butcher knife
 RegisterNetEvent('lusty94_butcher:server:GiveButcherKnife', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)        
+    local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then        
         Player.Functions.AddItem("butcherknife", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["butcherknife"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:AddItem(src,"butcherknife", 1)
+    end
 end)
 --give food packaging
-RegisterNetEvent('lusty94_butcher:server:GiveFoodPackaging', function()
+RegisterNetEvent('lusty94_butcher:server:GiveFoodPackaging', function(amount)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)        
-        Player.Functions.AddItem("foodpackaging", 5)
+    local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then        
+        Player.Functions.AddItem("foodpackaging", amount)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:AddItem(src,"foodpackaging", amount)
+    end
 end)
 
 --pick fresh chicken
 RegisterNetEvent('lusty94_butcher:server:PickChicken', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)        
+    local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then        
         Player.Functions.AddItem("freshchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["freshchicken"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:AddItem(src,"freshchicken", 1)
+    end
 end)
 
 ---------------------------------------------< FRESH CHICKEN END >---------------------------------------------
@@ -47,11 +59,16 @@ end)
 --pluck chicken
 RegisterNetEvent('lusty94_butcher:server:PluckChicken', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)        
+    local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then        
         Player.Functions.RemoveItem("freshchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["freshchicken"], "remove")
         Player.Functions.AddItem("pluckedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["pluckedchicken"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"freshchicken", 1)
+        exports.ox_inventory:AddItem(src,"pluckedchicken", 1)
+    end  
 end)
 
 --------------------------------------------------< PLUCKED CHICKEN END >--------------------------------------------
@@ -76,10 +93,15 @@ end)
 RegisterNetEvent('lusty94_butcher:server:ProcessChicken', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then
     Player.Functions.RemoveItem("pluckedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["pluckedchicken"], "remove")        
         Player.Functions.AddItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"pluckedchicken", 1)
+        exports.ox_inventory:AddItem(src,"processedchicken", 1)
+    end 
 end)
 
 --------------------------------------------------------< PROCESSED CHICKEN END >----------------------------------------------
@@ -104,51 +126,76 @@ end)
 --chicken breast
 RegisterNetEvent('lusty94_butcher:server:ProcessChickenBreast', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)        
+    local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then        
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")
         Player.Functions.AddItem("chickenbreast", 2)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreast"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"processedchicken", 1)
+        exports.ox_inventory:AddItem(src,"chickenbreast", 1)
+    end 
 end)
 
 --chicken thighs
 RegisterNetEvent('lusty94_butcher:server:ProcessChickenThighs', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")        
         Player.Functions.AddItem("chickenthighs", 2)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighs"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"processedchicken", 1)
+        exports.ox_inventory:AddItem(src,"chickenthighs", 1)
+    end 
 end)
 
 --chicken wings
 RegisterNetEvent('lusty94_butcher:server:ProcessChickenWings', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")        
         Player.Functions.AddItem("chickenwings", 2)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwings"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"processedchicken", 1)
+        exports.ox_inventory:AddItem(src,"chickenwings", 1)
+    end 
 end)
 
 --chicken drumsticks
 RegisterNetEvent('lusty94_butcher:server:ProcessChickenDrumSticks', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")          
         Player.Functions.AddItem("chickendrumsticks", 2)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumsticks"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"processedchicken", 1)
+        exports.ox_inventory:AddItem(src,"chickendrumsticks", 1)
+    end 
 end)
 
 --chicken legs
 RegisterNetEvent('lusty94_butcher:server:ProcessChickenLegs', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src) 
+    local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then 
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")         
         Player.Functions.AddItem("chickenlegs", 2)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegs"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"processedchicken", 1)
+        exports.ox_inventory:AddItem(src,"chickenlegs", 1)
+    end 
 end)
 
 
@@ -170,13 +217,19 @@ end)
 --chicken breast pack
 RegisterNetEvent('lusty94_butcher:server:PackChickenBreast', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src) 
+    local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then 
         Player.Functions.RemoveItem("chickenbreast", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreast"], "remove")         
         Player.Functions.RemoveItem("foodpackaging", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
         Player.Functions.AddItem("chickenbreastpack", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreastpack"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"chickenbreast", 1)
+        exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
+        exports.ox_inventory:AddItem(src,"chickenbreastpack", 1)
+    end 
 end)
 
 
@@ -199,12 +252,18 @@ end)
 RegisterNetEvent('lusty94_butcher:server:PackChickenThighs', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src) 
+    if InvType == 'qb' then
         Player.Functions.RemoveItem("chickenthighs", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighs"], "remove")         
         Player.Functions.RemoveItem("foodpackaging", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
         Player.Functions.AddItem("chickenthighspack", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighspack"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"chickenthighs", 1)
+        exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
+        exports.ox_inventory:AddItem(src,"chickenthighspack", 1)
+    end 
 end)
 
 
@@ -226,12 +285,18 @@ end)
 RegisterNetEvent('lusty94_butcher:server:PackChickenWings', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src) 
+    if InvType == 'qb' then
         Player.Functions.RemoveItem("chickenwings", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwings"], "remove")         
         Player.Functions.RemoveItem("foodpackaging", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
         Player.Functions.AddItem("chickenwingspack", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwingspack"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"chickenwings", 1)
+        exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
+        exports.ox_inventory:AddItem(src,"chickenwingspack", 1)
+    end 
 end)
 
 
@@ -252,13 +317,19 @@ end)
 --chicken drumsticks pack
 RegisterNetEvent('lusty94_butcher:server:PackChickenDrumSticks', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src) 
+    local Player = QBCore.Functions.GetPlayer(src)
+    if InvType == 'qb' then 
         Player.Functions.RemoveItem("chickendrumsticks", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumsticks"], "remove")         
         Player.Functions.RemoveItem("foodpackaging", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
         Player.Functions.AddItem("chickendrumstickspack", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumstickspack"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"chickendrumsticks", 1)
+        exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
+        exports.ox_inventory:AddItem(src,"chickendrumstickspack", 1)
+    end 
 end)
 
 --chicken legs & packaging callback
@@ -279,12 +350,18 @@ end)
 RegisterNetEvent('lusty94_butcher:server:PackChickenLegs', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src) 
+    if InvType == 'qb' then
         Player.Functions.RemoveItem("chickenlegs", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegs"], "remove")         
         Player.Functions.RemoveItem("foodpackaging", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
         Player.Functions.AddItem("chickenlegspack", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegspack"], "add")
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"chickenlegs", 1)
+        exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
+        exports.ox_inventory:AddItem(src,"chickenlegspack", 1)
+    end 
 end)
 ------------------------------------------------------------< CHICKEN PARTS END >--------------------------------------------------
 
@@ -304,19 +381,25 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenBreastPack', functio
 end)
 
 --sell chicken breast pack
-RegisterNetEvent('lusty94_butcher:server:SellChickenBreastPack', function()
+RegisterNetEvent('lusty94_butcher:server:SellChickenBreastPack', function(amount)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local price = Config.ItemPrices.SellItems["chickenbreastpack"] 
-
-        Player.Functions.RemoveItem("chickenbreastpack", 1)
+    if InvType == 'qb' then
+        Player.Functions.RemoveItem("chickenbreastpack", amount)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreastpack"], "remove")
-
-        if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
-            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price, "sold-butcher-items")
-        elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
-            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"chickenbreastpack", amount)
+    end
+    if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
+        if InvType == 'qb' then
+            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price * amount, "sold-butcher-items")
+        elseif InvType == 'ox' then
+            exports.ox_inventory:AddItem(src,"money", price * amount)
         end
+    elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
+            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price * amount) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+    end
 end)
 
 --chicken thighs pack callback
@@ -332,19 +415,25 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenThighsPack', functio
 end)
 
 --sell chicken thighs pack
-RegisterNetEvent('lusty94_butcher:server:SellChickenThighsPack', function()
+RegisterNetEvent('lusty94_butcher:server:SellChickenThighsPack', function(amount)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local price = Config.ItemPrices.SellItems["chickenthighspack"] 
-
-        Player.Functions.RemoveItem("chickenthighspack", 1)
+    if InvType == 'qb' then
+        Player.Functions.RemoveItem("chickenthighspack", amount)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighspack"], "remove")
-
-        if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
-            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price, "sold-butcher-items")
-        elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
-            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"chickenthighspack", amount)
+    end
+    if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
+        if InvType == 'qb' then
+            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price * amount, "sold-butcher-items")
+        elseif InvType == 'ox' then
+            exports.ox_inventory:AddItem(src,"money", price * amount)
         end
+    elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
+            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price * amount) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+    end
 end)
 
 --chicken wings pack callback
@@ -360,19 +449,25 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenWingsPack', function
 end)
 
 --sell chicken wings pack
-RegisterNetEvent('lusty94_butcher:server:SellChickenWingsPack', function()
+RegisterNetEvent('lusty94_butcher:server:SellChickenWingsPack', function(amount)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local price = Config.ItemPrices.SellItems["chickenwingspack"] 
-
-        Player.Functions.RemoveItem("chickenwingspack", 1)
+    if InvType == 'qb' then
+        Player.Functions.RemoveItem("chickenwingspack", amount)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwingspack"], "remove")
-
-        if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
-            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price, "sold-butcher-items")
-        elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
-            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"chickenwingspack", amount)
+    end
+    if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
+        if InvType == 'qb' then
+            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price * amount, "sold-butcher-items")
+        elseif InvType == 'ox' then
+            exports.ox_inventory:AddItem(src,"money", price * amount)
         end
+    elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
+            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price * amount) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+    end
 end)
 
 --chicken drumsticks pack callback
@@ -388,19 +483,25 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenDrumSticksPack', fun
 end)
 
 --sell chicken drumsticks pack
-RegisterNetEvent('lusty94_butcher:server:SellChickenDrumSticksPack', function()
+RegisterNetEvent('lusty94_butcher:server:SellChickenDrumSticksPack', function(amount)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local price = Config.ItemPrices.SellItems["chickendrumstickspack"] 
-
-        Player.Functions.RemoveItem("chickendrumstickspack", 1)
+    if InvType == 'qb' then
+        Player.Functions.RemoveItem("chickendrumstickspack", amount)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumstickspack"], "remove")
-
-        if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
-            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price, "sold-butcher-items")
-        elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
-            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"chickendrumstickspack", amount)
+    end
+    if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
+        if InvType == 'qb' then
+            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price * amount, "sold-butcher-items")
+        elseif InvType == 'ox' then
+            exports.ox_inventory:AddItem(src,"money", price * amount)
         end
+    elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
+            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price * amount) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+    end
 end)
 
 --chicken legs pack callback
@@ -416,19 +517,25 @@ QBCore.Functions.CreateCallback('lusty94_butcher:get:ChickenLegsPack', function(
 end)
 
 --sell chicken legs pack
-RegisterNetEvent('lusty94_butcher:server:SellChickenLegsPack', function()
+RegisterNetEvent('lusty94_butcher:server:SellChickenLegsPack', function(amount)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local price = Config.ItemPrices.SellItems["chickenlegspack"] 
-
-        Player.Functions.RemoveItem("chickenlegspack", 1)
+    if InvType == 'qb' then
+        Player.Functions.RemoveItem("chickenlegspack", amount)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegspack"], "remove")
-
-        if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
-            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price, "sold-butcher-items")
-        elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
-            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+    elseif InvType == 'ox' then
+        exports.ox_inventory:RemoveItem(src,"chickenlegspack", amount)
+    end
+    if Config.ItemPrices.PaymentAccounts.PaymentType == 'personal' then
+        if InvType == 'qb' then
+            Player.Functions.AddMoney(Config.ItemPrices.PaymentAccounts.AccountUsedToSell, price * amount, "sold-butcher-items")
+        elseif InvType == 'ox' then
+            exports.ox_inventory:AddItem(src,"money", price * amount)
         end
+    elseif Config.ItemPrices.PaymentAccounts.PaymentType == 'society' then
+            exports['qb-management']:AddMoney(Config.CoreSettings.Job.Name, price * amount) -- add amount of sale to societ fund for job defined in config, society name needs to be in database tables also
+    end
 end)
 
 

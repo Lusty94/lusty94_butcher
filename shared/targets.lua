@@ -1,7 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
+local TargetType = Config.CoreSettings.Target.Type
 
-
-if Config.CoreSettings.Target.Type == 'qb' then
+if TargetType == 'qb' then
     --toggle duty
     exports['qb-target']:AddBoxZone("ToggleDuty", Config.InteractionLocations.JobAreas.Duty.Location.Location, Config.InteractionLocations.JobAreas.Duty.Location.Height, Config.InteractionLocations.JobAreas.Duty.Location.Width, {
         name = "ToggleDuty",
@@ -173,7 +173,7 @@ if Config.CoreSettings.Target.Type == 'qb' then
         },
         distance = 1.5,
     })
-elseif Config.CoreSettings.Target.Type == 'ox' then
+elseif TargetType == 'ox' then
     --toggle duty
     exports.ox_target:addBoxZone({
         coords = Config.InteractionLocations.JobAreas.Duty.Location.Location,
@@ -182,6 +182,7 @@ elseif Config.CoreSettings.Target.Type == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
+                id = 1,
                 name = 'ToggleDuty',
                 event = 'lusty94_butcher:client:ToggleDuty',
                 label = Config.InteractionLocations.JobAreas.Duty.Location.Label,
@@ -197,6 +198,7 @@ elseif Config.CoreSettings.Target.Type == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
+                id = 2,
                 name = 'BossMenu',
                 event = Config.CoreSettings.EventNames.BossMenu,
                 label = Config.InteractionLocations.JobAreas.BossMenu.Location.Label,
@@ -212,6 +214,7 @@ elseif Config.CoreSettings.Target.Type == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
+                id = 3,
                 name = 'ClothingLockers',
                 event = Config.CoreSettings.EventNames.Clothing,
                 label = Config.InteractionLocations.JobAreas.ClothingLockers.Location.Label,
@@ -227,6 +230,7 @@ elseif Config.CoreSettings.Target.Type == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
+                id = 4,
                 name = 'PickChicken',
                 event = 'lusty94_butcher:client:PickChicken',
                 label = Config.InteractionLocations.Preparation.PickChicken.Location.Label,
@@ -242,6 +246,7 @@ elseif Config.CoreSettings.Target.Type == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
+                id = 5,
                 name = 'PluckChicken',
                 event = 'lusty94_butcher:client:PluckChicken',
                 label = Config.InteractionLocations.Preparation.PluckChicken.Location.Label,
@@ -257,6 +262,7 @@ elseif Config.CoreSettings.Target.Type == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
+                id = 6,
                 name = 'PrepareChicken',
                 event = 'lusty94_butcher:client:ProcessChicken',
                 label = Config.InteractionLocations.Preparation.PrepareChicken.Location.Label,
@@ -272,6 +278,7 @@ elseif Config.CoreSettings.Target.Type == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
+                id = 7,
                 name = 'ProcessChicken',
                 event = 'lusty94_butcher:client:ProcessChickenMenu',
                 label = Config.InteractionLocations.Preparation.ProcessChicken.Location.Label,
@@ -287,6 +294,7 @@ elseif Config.CoreSettings.Target.Type == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
+                id = 8,
                 name = 'PackChicken',
                 event = 'lusty94_butcher:client:PackChickenMenu',
                 label = Config.InteractionLocations.Preparation.PackChicken.Location.Label,
@@ -302,6 +310,7 @@ elseif Config.CoreSettings.Target.Type == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
+                id = 9,
                 name = 'SellChicken',
                 event = 'lusty94_butcher:client:SellChickenMenu',
                 label = Config.InteractionLocations.Preparation.SellChicken.Location.Label,
@@ -309,6 +318,6 @@ elseif Config.CoreSettings.Target.Type == 'ox' then
             }
         }
     })
-elseif Config.CoreSettings.Target.Type == 'custom' then
+elseif TargetType == 'custom' then
     --insert your custom target code here
 end

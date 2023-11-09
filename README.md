@@ -25,12 +25,12 @@ SELL WHAT YOU HAVE MADE FOR CASH OR BANK OR EVEN BACK TO THE SOCIETY ACCOUNT YOU
 ```
 
 ``qb-core: https://github.com/qbcore-framework/qb-core``
-
 ``qb-target: https://github.com/qbcore-framework/qb-target``
-
-``progressbar: https://github.com/qbcore-framework/progressbar``
-
 ``qb-menu: https://github.com/qbcore-framework/qb-menu``
+``qb-input: https://github.com/qbcore-framework/qb-input``
+``qb-inventory: https://github.com/qbcore-framework/qb-inventory``
+``progressbar: https://github.com/qbcore-framework/progressbar``
+``ox_lib: https://github.com/overextended/ox_lib/releases/``
 
 
 
@@ -42,16 +42,16 @@ SELL WHAT YOU HAVE MADE FOR CASH OR BANK OR EVEN BACK TO THE SOCIETY ACCOUNT YOU
 ```
 
 
-``MAKE SURE TO INSTALL ALL NECCESSARY DEPENDENCIES AND ENSURE THEY START BEFORE LUSTY94_BUTCHER IN YOUR SERVER.CFG FILE``
+## MAKE SURE TO INSTALL ALL NECCESSARY DEPENDENCIES AND ENSURE THEY START BEFORE LUSTY94_BUTCHER IN YOUR SERVER.CFG FILE
 
 	
-``Insert [images] into inventory/html/images``
+## Insert [images] into inventory/html/images - ox_inventory users is inventory/web/images
 
 
 
-``Insert items into qb-core/shared/items.lua``
+## Insert items into qb-core/shared/items.lua
 
-``Adjust weights of items to suit your server``
+## Adjust weights of items to suit your server
 
 
 ```
