@@ -1,10 +1,15 @@
 local QBCore = exports['qb-core']:GetCoreObject()
+local NotifyType = Config.CoreSettings.Notify.Type
+local TargetType = Config.CoreSettings.Target.Type
+local InvType = Config.CoreSettings.Inventory.Type
+local ClothingType = Config.CoreSettings.Clothing.Type
+local onDuty, busy, selling = true, false, false
+local playerPed = PlayerPedId()
 PlayerJob = {}
-local onDuty = false
-local player = PlayerPedId()
 
 
------------------------------------------< BLIPS START >-------------------------------------
+
+------------------------------< BLIPS >-------------------------------------
 CreateThread(function()
     for k, v in pairs(Config.Blips) do
         if v.useblip then
@@ -20,605 +25,200 @@ CreateThread(function()
         end
     end
 end)
------------------------------------------< BLIPS START >-------------------------------------
 
 
-------------------------------------------------------------< PICK CHICKEN START >----------------------------------
-RegisterNetEvent('lusty94_butcher:client:PickChicken', function()
-    if onDuty then
+
+--------------------------< FUNCTIONS >------------------------
+
+--notification function
+local function SendNotify(msg,type,time,title)
+    if NotifyType == nil then print("Lusty94_Butcher: NotifyType Not Set in Config.CoreSettings.Notify.Type!") return end
+    if not title then title = "Notification" end
+    if not time then time = 5000 end
+    if not type then type = 'success' end
+    if not msg then print("Notification Sent With No Message.") return end
+    if NotifyType == 'qb' then
+        QBCore.Functions.Notify(msg,type,time)
+    elseif NotifyType == 'okok' then
+        exports['okokNotify']:Alert(title, msg, time, type, true)
+    elseif NotifyType == 'mythic' then
+        exports['mythic_notify']:DoHudText(type, msg)
+    elseif NotifyType == 'boii' then
+        exports['boii_ui']:notify(title, msg, type, time)
+    elseif NotifyType == 'ox' then
+        lib.notify({ title = title, description = msg, type = type, duration = time})
+    end
+end
+
+function doAnims(args)
+   local args = tonumber(args)   
+   if args == 1 then
         RequestAnimDict(Config.Animations.PickChicken.dict)
         while not HasAnimDictLoaded(Config.Animations.PickChicken.dict) do
-            Wait(0)
+            Wait(100)
         end
-        TaskPlayAnim(PlayerPedId(), Config.Animations.PickChicken.dict, Config.Animations.PickChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-        if Config.MiniGameSettings.Type == 'progressbar' then
-            QBCore.Functions.Progressbar("pick_chicken", "Picking Fresh Chicken", Config.CoreSettings.ProgressBar.Times.TimeToPickChicken, false, true, {
-                disableMovement = true,
-                disableCarMovement = true,
-                disableMouse = false,
-                disableCombat = true,
-            }, {
-            }, {}, {}, function()
-                ClearPedTasks(PlayerPedId())
-                TriggerServerEvent('lusty94_butcher:server:PickChicken')
-                    if Config.CoreSettings.Notify.Type == 'qb' then
-                        QBCore.Functions.Notify("You Picked A Fresh Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                    elseif Config.CoreSettings.Notify.Type == 'okok' then
-                        exports['okokNotify']:Alert('Picked Bird', 'You Picked A Fresh Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                    elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                        exports['mythic_notify']:DoHudText('success', 'You Picked A Fresh Chicken!') 
-                    elseif Config.CoreSettings.Notify.Type == 'boii' then
-                        exports['boii_ui']:notify('Picked Bird', 'You Picked A Fresh Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                    end
-            end, function()
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
+        TaskPlayAnim(playerPed, Config.Animations.PickChicken.dict, Config.Animations.PickChicken.anim, 1.0, -1.0, 1.0, Config.Animations.PickChicken.flag, 0, 0, 0, 0)
+   elseif args == 2 then
+        RequestAnimDict(Config.Animations.PluckChicken.dict)
+        while not HasAnimDictLoaded(Config.Animations.PluckChicken.dict) do
+            Wait(100)
+        end
+        TaskPlayAnim(playerPed, Config.Animations.PluckChicken.dict, Config.Animations.PluckChicken.anim, 1.0, -1.0, 1.0, Config.Animations.PluckChicken.flag, 0, 0, 0, 0)
+   elseif args == 3 then
+        RequestAnimDict(Config.Animations.ProcessChicken.dict)
+        while not HasAnimDictLoaded(Config.Animations.ProcessChicken.dict) do
+            Wait(100)
+        end
+        TaskPlayAnim(playerPed, Config.Animations.ProcessChicken.dict, Config.Animations.ProcessChicken.anim, 1.0, -1.0, 1.0, Config.Animations.ProcessChicken.flag, 0, 0, 0, 0)
+   elseif args == 4 then
+        RequestAnimDict(Config.Animations.PackChicken.dict)
+        while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
+            Wait(100)
+        end
+        TaskPlayAnim(playerPed, Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, Config.Animations.PackChicken.flag, 0, 0, 0, 0)
+   end
+end
+
+
+
+
+
+
+-------------------------------------< PICK CHICKEN >----------------------------------
+RegisterNetEvent('lusty94_butcher:client:PickChicken', function()
+    if onDuty then
+        if busy then
+            SendNotify("You Are Already Doing Something.", 'error', 2000)
+        else
+            if IsEntityAttached(chickenPed) then
+                SendNotify("You Are Already Have A Chicken.", 'error', 2000)
+            else
+                FreezeEntityPosition(playerPed, true) 
+                LockInventory(true)
+                busy = true
+                doAnims(1)
+                Wait(Config.CoreSettings.Timers.Pick)
+                ClearPedTasks(playerPed)
+                SendNotify("You Picked A Chicken Now Go Pluck It.", 'success', 2000)
+                local playerCoords = GetEntityCoords(playerPed)
+                local chickenModel = 'a_c_hen'
+                RequestModel(chickenModel)
+                while not HasModelLoaded(chickenModel) do
+                    Wait(500)
+                end            
+                chickenPed = CreatePed(0, chickenModel, playerCoords.x, playerCoords.y, playerCoords.z, 0, true, true)
+                AttachEntityToEntity(chickenPed, playerPed, GetPedBoneIndex(playerPed, 57005), 0.12, 0.0, 0.0, 0.0, 255.0, 30.0, true, true, false, true, 1, true)
+                local dict = 'move_weapon@jerrycan@generic'
+                local anim = 'idle'
+                RequestAnimDict(dict)
+                while not HasAnimDictLoaded(dict) do
+                    Wait(10)
                 end
-            end)
-        elseif Config.MiniGameSettings.Type == 'skillbar' then
-                    local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                    Skillbar.Start({
-                        duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                        pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                        width = Config.MiniGameSettings.SkillBarSettings.Width,
-                    }, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:PickChicken')
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("You Picked A Fresh Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Picked Bird', 'You Picked A Fresh Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('success', 'You Picked A Fresh Chicken!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Picked Bird', 'You Picked A Fresh Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                        end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-        elseif Config.MiniGameSettings.Type == 'ps-ui' then
-            exports['ps-ui']:Circle(function(success)
-                if success then
-                    ClearPedTasks(PlayerPedId())
-                    TriggerServerEvent('lusty94_butcher:server:PickChicken')
-                    if Config.CoreSettings.Notify.Type == 'qb' then
-                        QBCore.Functions.Notify("You Picked A Fresh Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                    elseif Config.CoreSettings.Notify.Type == 'okok' then
-                        exports['okokNotify']:Alert('Picked Bird', 'You Picked A Fresh Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                    elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                        exports['mythic_notify']:DoHudText('success', 'You Picked A Fresh Chicken!') 
-                    elseif Config.CoreSettings.Notify.Type == 'boii' then
-                        exports['boii_ui']:notify('Picked Bird', 'You Picked A Fresh Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                    end
-                else
-                    ClearPedTasks(PlayerPedId())
-                    if Config.CoreSettings.Notify.Type == 'qb' then
-                        QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                    elseif Config.CoreSettings.Notify.Type == 'okok' then
-                        exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                    elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                        exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                    elseif Config.CoreSettings.Notify.Type == 'boii' then
-                        exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                    end
-                end
-            end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-        elseif Config.MiniGameSettings.Type == 'boii' then
-            exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                if success then
-                    ClearPedTasks(PlayerPedId())
-                    TriggerServerEvent('lusty94_butcher:server:PickChicken')
-                    if Config.CoreSettings.Notify.Type == 'qb' then
-                        QBCore.Functions.Notify("You Picked A Fresh Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                    elseif Config.CoreSettings.Notify.Type == 'okok' then
-                        exports['okokNotify']:Alert('Picked Bird', 'You Picked A Fresh Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                    elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                        exports['mythic_notify']:DoHudText('success', 'You Picked A Fresh Chicken!') 
-                    elseif Config.CoreSettings.Notify.Type == 'boii' then
-                        exports['boii_ui']:notify('Picked Bird', 'You Picked A Fresh Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                    end
-                else
-                    ClearPedTasks(PlayerPedId())
-                    if Config.CoreSettings.Notify.Type == 'qb' then
-                        QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                    elseif Config.CoreSettings.Notify.Type == 'okok' then
-                        exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                    elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                        exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                    elseif Config.CoreSettings.Notify.Type == 'boii' then
-                        exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                    end
-                end
-            end)
+                TaskPlayAnim(playerPed, dict, anim, 1.0, -1.0, 1.0, 51, 11, 0, 0, 0)
+                busy = false
+                LockInventory(false)
+                FreezeEntityPosition(playerPed, false) 
+            end
         end
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
     end
 end)
-------------------------------------------------------------< PICK CHICKEN END >-----------------------------------
 
-
-
-
------------------------------------------------------------< PLUCK CHICKEN START >-----------------------------------
+-----------------------------------------< PLUCK CHICKEN >-----------------------------------
 RegisterNetEvent('lusty94_butcher:client:PluckChicken', function()
     if onDuty then
-        QBCore.Functions.TriggerCallback('lusty94_butcher:get:FreshChicken', function(HasItems)  
-            if HasItems then
-                RequestAnimDict(Config.Animations.PluckChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PluckChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PluckChicken.dict, Config.Animations.PluckChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("pluck_chicken", "Plucking Chicken", Config.CoreSettings.ProgressBar.Times.TimeToPluckChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:PluckChicken')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Plucked A Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Plucked Bird', 'You Plucked A Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Plucked A Chicken!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Plucked Bird', 'You Plucked A Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:PluckChicken')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Plucked A Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Plucked Bird', 'You Plucked A Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Plucked A Chicken!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Plucked Bird', 'You Plucked A Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PluckChicken')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Plucked A Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Plucked Bird', 'You Plucked A Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Plucked A Chicken!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Plucked Bird', 'You Plucked A Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PluckChicken')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Plucked A Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Plucked Bird', 'You Plucked A Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Plucked A Chicken!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Plucked Bird', 'You Plucked A Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
-                end
+        if busy then
+            SendNotify("You Are Already Doing Something.", 'error', 2000)
+        else
+            if IsEntityAttached(chickenPed) then
+                FreezeEntityPosition(playerPed, true) 
+                LockInventory(true)
+                ClearPedTasks(playerPed)
+                busy = true
+                doAnims(2)
+                Wait(Config.CoreSettings.Timers.Pluck)
+                DeleteEntity(chickenPed)
+                SendNotify("You Plucked A Chicken Now Go Process It.", 'success', 2000)
+                TriggerServerEvent('lusty94_butcher:server:PluckChicken')
+                ClearPedTasks(playerPed)
+                busy = false
+                LockInventory(false)
+                FreezeEntityPosition(playerPed, false)
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Dont Have A Chicken.", 'error', 2000)
             end
-        end)
-
-    else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
         end
-    end  
+    else
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end 
 end)
-------------------------------------------------------------< PLUCK CHICKEN END >-----------------------------------
 
 
-------------------------------------------------------------< PROCESS CHICKEN START >-----------------------------------
+
+----------------------------------------< PROCESS CHICKEN >-----------------------------------
 RegisterNetEvent('lusty94_butcher:client:ProcessChicken', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:PluckedChicken', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.ProcessChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.ProcessChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.ProcessChicken.dict, Config.Animations.ProcessChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("pluck_chicken", "Processing Chicken", Config.CoreSettings.ProgressBar.Times.TimeToProcessChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:ProcessChicken')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed A Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Bird', 'You Processed A Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed A Chicken!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Bird', 'You Processed A Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:ProcessChicken')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Processed A Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Processed Bird', 'You Processed A Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Processed A Chicken!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Processed Bird', 'You Processed A Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChicken')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed A Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Bird', 'You Processed A Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed A Chicken!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Bird', 'You Processed A Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChicken')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed A Chicken", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Bird', 'You Processed A Chicken', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed A Chicken!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Bird', 'You Processed A Chicken', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    LockInventory(true)
+                    busy = true
+                    doAnims(3)
+                    Wait(Config.CoreSettings.Timers.Process)
+                    SendNotify("You Processed A Chicken.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:ProcessChicken')
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Plucked Chicken.", 'error', 2000)
             end
         end) 
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end 
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end
 end)
-------------------------------------------------------------< PROCESS CHICKEN END >-----------------------------------
 
+function attachKnife()
+    local coords = GetEntityCoords(playerPed)
+    knife = CreateObject('v_ind_cfknife', coords, true, false, false)
+    AttachEntityToEntity(knife, playerPed, GetPedBoneIndex(PlayerPedId(), 57005), 0.2, 0.14, -0.01, 1.0, 4.0, 57.0, true, true, false, false, 1, true)
+end
 
-
-
-------------------------------------------------------------< PROCESS CHICKEN START START >-----------------------------------
 RegisterNetEvent('lusty94_butcher:client:ProcessChickenBreast', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:ProcessedChicken', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.PackChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("chicken_breast", "Processing Chicken Breast", Config.CoreSettings.ProgressBar.Times.TimeToProcessChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:ProcessChickenBreast')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Breast", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Breast', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Breast!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Breast', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:ProcessChickenBreast')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Processed Chicken Breast", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Breast', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Breast!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Breast', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChickenBreast')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Breast", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Breast', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Breast!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Breast', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChickenBreast')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Breast", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Breast', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Breast!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Breast', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    attachKnife()
+                    LockInventory(true)
+                    busy = true
+                    doAnims(3)
+                    Wait(Config.CoreSettings.Timers.Process)
+                    SendNotify("You Processed A Chicken Into Breasts.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:ProcessChickenBreast')
+                    DeleteObject(knife)
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Processed Chicken Or A Butchers Knife.", 'error', 2000)
             end
         end) 
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end 
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end
 end)
 
 
@@ -626,149 +226,30 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChickenThighs', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:ProcessedChicken', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.PackChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("chicken_Thigh", "Processing Chicken Thighs", Config.CoreSettings.ProgressBar.Times.TimeToProcessChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:ProcessChickenThighs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Thighs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Thighs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Thighs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Thighs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:ProcessChickenThighs')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Processed Chicken Thighs", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Thighs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Thighs!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Thighs', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChickenThighs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Thighs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Thighs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Thighs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Thighs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChickenThighs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Thighs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Thighs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Thighs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Thighs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    attachKnife()
+                    LockInventory(true)
+                    busy = true
+                    doAnims(3)
+                    Wait(Config.CoreSettings.Timers.Process)
+                    SendNotify("You Processed A Chicken Into Thighs.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:ProcessChickenThighs')
+                    DeleteObject(knife)
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Processed Chicken Or A Butchers Knife.", 'error', 2000)
             end
-        end)  
+        end) 
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end  
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end 
 end)
 
 
@@ -776,148 +257,29 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChickenWings', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:ProcessedChicken', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.PackChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("chicken_Wings", "Processing Chicken Wings", Config.CoreSettings.ProgressBar.Times.TimeToProcessChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:ProcessChickenWings')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Wings", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Wings', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Wings!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Wings', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:ProcessChickenWings')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Processed Chicken Wings", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Wings', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Wings!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Wings', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChickenWings')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Wings", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Wings', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Wings!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Wings', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChickenWings')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Wings", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Wings', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Wings!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Wings', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    attachKnife()
+                    LockInventory(true)
+                    busy = true
+                    doAnims(3)
+                    Wait(Config.CoreSettings.Timers.Process)
+                    SendNotify("You Processed A Chicken Into Wings.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:ProcessChickenWings')
+                    DeleteObject(knife)
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Processed Chicken Or A Butchers Knife.", 'error', 2000)
             end
-        end)
-     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
+        end) 
+    else
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
     end   
 end)
 
@@ -926,149 +288,30 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChickenDrumSticks', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:ProcessedChicken', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.PackChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("chicken_DrumSticks", "Processing Chicken Drumsticks", Config.CoreSettings.ProgressBar.Times.TimeToProcessChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:ProcessChickenDrumSticks')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Drumsticks", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Drumsticks', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Drumsticks!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Drumsticks', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:ProcessChickenDrumSticks')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Processed Chicken Drumsticks", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Drumsticks', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Drumsticks!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Drumsticks', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChickenDrumSticks')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Drumsticks", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Drumsticks', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Drumsticks!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Drumsticks', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChickenDrumSticks')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Drumsticks", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Drumsticks', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Drumsticks!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Drumsticks', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    attachKnife()
+                    LockInventory(true)
+                    busy = true
+                    doAnims(3)
+                    Wait(Config.CoreSettings.Timers.Process)
+                    SendNotify("You Processed A Chicken Into Drumsticks.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:ProcessChickenDrumsticks')
+                    DeleteObject(knife)
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Processed Chicken Or A Butchers Knife.", 'error', 2000)
             end
-        end)  
+        end) 
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end 
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end
 end)
 
 
@@ -1076,319 +319,61 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChickenLegs', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:ProcessedChicken', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.PackChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("chicken_Legs", "Processing Chicken Legs", Config.CoreSettings.ProgressBar.Times.TimeToProcessChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:ProcessChickenLegs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Legs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Legs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Legs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Legs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:ProcessChickenLegs')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Processed Chicken Legs", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Legs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Legs!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Legs', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChickenLegs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Legs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Legs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Legs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Legs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:ProcessChickenLegs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Processed Chicken Legs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Processed Item', 'You Processed Chicken Legs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Processed Chicken Legs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Processed Item', 'You Processed Chicken Legs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    attachKnife()
+                    LockInventory(true)
+                    busy = true
+                    doAnims(3)
+                    Wait(Config.CoreSettings.Timers.Process)
+                    SendNotify("You Processed A Chicken Into Legs.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:ProcessChickenLegs')
+                    DeleteObject(knife)
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Processed Chicken Or A Butchers Knife.", 'error', 2000)
             end
-        end)
+        end) 
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
     end   
 end)
-------------------------------------------------------------< PROCESS CHICKEN START END >-----------------------------------
-
-RegisterNetEvent('lusty94_butcher:client:GiveFoodPackaging', function(amount) 
-    local dialog = exports['qb-input']:ShowInput({
-        header = "How Much Packaging Do You Want?",
-        submitText = "Confirm",
-        inputs = {
-            {
-                text = "Amount", -- text you want to be displayed as a place holder
-                name = "amount", -- name of the input should be unique otherwise it might override
-                type = "number", -- type of the input - number will not allow non-number characters in the field so only accepts 0-9
-                isRequired = true, -- Optional [accepted values: true | false] but will submit the form if no value is inputted
-            }
-        },
-    })
-    if dialog then
-		TriggerServerEvent('lusty94_butcher:server:GiveFoodPackaging', tonumber(dialog["amount"]))
-    end
-end, false)
 
 
-------------------------------------------------------------< PACK CHICKEN START >-----------------------------------
+-------------------------------------< PACK CHICKEN >-----------------------------------
+
 RegisterNetEvent('lusty94_butcher:client:PackChickenBreast', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:ChickenBreast', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.PackChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("chicken_breast", "Packing Chicken Breast", Config.CoreSettings.ProgressBar.Times.TimeToPackChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:PackChickenBreast')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Breast", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Breast', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Breast!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Breast', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:PackChickenBreast')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Packed Chicken Breast", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Breast', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Breast!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Breast', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PackChickenBreast')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Breast", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Breast', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Breast!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Breast', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PackChickenBreast')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Breast", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Breast', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Breast!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Breast', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    LockInventory(true)
+                    busy = true
+                    doAnims(4)
+                    Wait(Config.CoreSettings.Timers.Pack)
+                    SendNotify("You Packed Chicken Breast.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:PackChickenBreast')
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Chicken Breast Or Food Packaging.", 'error', 2000)
             end
         end) 
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end 
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end  
 end)
 
 
@@ -1396,149 +381,28 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenThighs', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:ChickenThighs', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.PackChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("chicken_Thigh", "Packing Chicken Thighs", Config.CoreSettings.ProgressBar.Times.TimeToPackChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:PackChickenThighs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Thighs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Thighs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Thighs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Thighs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:PackChickenThighs')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Packed Chicken Thighs", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Thighs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Thighs!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Thighs', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PackChickenThighs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Thighs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Thighs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Thighs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Thighs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PackChickenThighs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Thighs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Thighs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Thighs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Thighs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    LockInventory(true)
+                    busy = true
+                    doAnims(4)
+                    Wait(Config.CoreSettings.Timers.Pack)
+                    SendNotify("You Packed Chicken Thighs.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:PackChickenThighs')
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Chicken Thighs Or Food Packaging.", 'error', 2000)
             end
-        end)  
+        end) 
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end  
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end   
 end)
 
 
@@ -1546,149 +410,28 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenWings', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:ChickenWings', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.PackChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("chicken_Wings", "Packing Chicken Wings", Config.CoreSettings.ProgressBar.Times.TimeToPackChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:PackChickenWings')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Wings", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Wings', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Wings!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Wings', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:PackChickenWings')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Packed Chicken Wings", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Wings', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Wings!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Wings', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PackChickenWings')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Wings", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Wings', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Wings!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Wings', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PackChickenWings')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Wings", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Wings', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Wings!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Wings', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    LockInventory(true)
+                    busy = true
+                    doAnims(4)
+                    Wait(Config.CoreSettings.Timers.Pack)
+                    SendNotify("You Packed Chicken Wings.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:PackChickenWings')
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Chicken Wings Or Food Packaging.", 'error', 2000)
             end
-        end)
-     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end   
+        end) 
+    else
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end    
 end)
 
 
@@ -1696,149 +439,28 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenDrumSticks', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:ChickenDrumsticks', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.PackChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("chicken_DrumSticks", "Packing Chicken Drumsticks", Config.CoreSettings.ProgressBar.Times.TimeToPackChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:PackChickenDrumSticks')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Drumsticks", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Drumsticks', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Drumsticks!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Drumsticks', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:PackChickenDrumSticks')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Packed Chicken Drumsticks", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Drumsticks', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Drumsticks!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Drumsticks', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PackChickenDrumSticks')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Drumsticks", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Drumsticks', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Drumsticks!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Drumsticks', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PackChickenDrumSticks')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Drumsticks", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Drumsticks', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Drumsticks!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Drumsticks', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    LockInventory(true)
+                    busy = true
+                    doAnims(4)
+                    Wait(Config.CoreSettings.Timers.Pack)
+                    SendNotify("You Packed Chicken Drumsticks.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:PackChickenDrumsticks')
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Chicken Drumsticks Or Food Packaging.", 'error', 2000)
             end
-        end)  
+        end) 
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end 
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end  
 end)
 
 
@@ -1846,381 +468,134 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenLegs', function()
     if onDuty then
         QBCore.Functions.TriggerCallback('lusty94_butcher:get:ChickenLegs', function(HasItems)  
             if HasItems then
-                RequestAnimDict(Config.Animations.PackChicken.dict)
-                while not HasAnimDictLoaded(Config.Animations.PackChicken.dict) do
-                    Wait(0)
-                end
-                TaskPlayAnim(PlayerPedId(), Config.Animations.PackChicken.dict, Config.Animations.PackChicken.anim, 1.0, -1.0, 1.0, 11, 0, 0, 0, 0)
-                if Config.MiniGameSettings.Type == 'progressbar' then
-                    QBCore.Functions.Progressbar("chicken_Legs", "Packing Chicken Legs", Config.CoreSettings.ProgressBar.Times.TimeToPackChicken, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                    }, {}, {}, function()
-                        ClearPedTasks(PlayerPedId())
-                        TriggerServerEvent('lusty94_butcher:server:PackChickenLegs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Legs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Legs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Legs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Legs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                    end, function()
-                        ClearPedTasks(PlayerPedId())
-                        if Config.CoreSettings.Notify.Type == 'qb' then
-                            QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                        elseif Config.CoreSettings.Notify.Type == 'okok' then
-                            exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                            exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                        elseif Config.CoreSettings.Notify.Type == 'boii' then
-                            exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                        end
-                    end)
-                elseif Config.MiniGameSettings.Type == 'skillbar' then
-                            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-                            Skillbar.Start({
-                                duration = Config.MiniGameSettings.SkillBarSettings.Duration,
-                                pos = Config.MiniGameSettings.SkillBarSettings.Position,
-                                width = Config.MiniGameSettings.SkillBarSettings.Width,
-                            }, function()
-                                ClearPedTasks(PlayerPedId())
-                                TriggerServerEvent('lusty94_butcher:server:PackChickenLegs')
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("You Packed Chicken Legs", "success", Config.CoreSettings.Notify.Length.Success)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Legs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Legs!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Legs', 'success', Config.CoreSettings.Notify.Length.Success)
-                                end
-                            end, function()
-                                ClearPedTasks(PlayerPedId())
-                                if Config.CoreSettings.Notify.Type == 'qb' then
-                                    QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                    exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                                elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                    exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                    exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                                end
-                            end)
-                elseif Config.MiniGameSettings.Type == 'ps-ui' then
-                    exports['ps-ui']:Circle(function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PackChickenLegs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Legs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Legs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Legs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Legs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end, Config.MiniGameSettings.SkillCircleSettings.Circles, Config.MiniGameSettings.SkillCircleSettings.MS) -- NumberOfCircles, MS
-                elseif Config.MiniGameSettings.Type == 'boii' then
-                    exports['boii_ui']:keydrop(Config.MiniGameSettings.KeyDropSettings.ScoreLimit, Config.MiniGameSettings.KeyDropSettings.MissLimit, Config.MiniGameSettings.KeyDropSettings.FallDelay, Config.MiniGameSettings.KeyDropSettings.NewLetterDelay, function(success)
-                        if success then
-                            ClearPedTasks(PlayerPedId())
-                            TriggerServerEvent('lusty94_butcher:server:PackChickenLegs')
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("You Packed Chicken Legs", "success", Config.CoreSettings.Notify.Length.Success)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Packed Item', 'You Packed Chicken Legs', Config.CoreSettings.Notify.Length.Success, 'success', Config.CoreSettings.Notify.Sound)
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('success', 'You Packed Chicken Legs!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Packed Item', 'You Packed Chicken Legs', 'success', Config.CoreSettings.Notify.Length.Success)
-                            end
-                        else
-                            ClearPedTasks(PlayerPedId())
-                            if Config.CoreSettings.Notify.Type == 'qb' then
-                                QBCore.Functions.Notify("Cancelled", "error", Config.CoreSettings.Notify.Length.Error)
-                            elseif Config.CoreSettings.Notify.Type == 'okok' then
-                                exports['okokNotify']:Alert('Cancelled','Cancelled', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                            elseif Config.CoreSettings.Notify.Type == 'mythic' then
-                                exports['mythic_notify']:DoHudText('error', 'Cancelled!') 
-                            elseif Config.CoreSettings.Notify.Type == 'boii' then
-                                exports['boii_ui']:notify('Cancelled', 'Cancelled', 'error', Config.CoreSettings.Notify.Length.Error)
-                            end
-                        end
-                    end)
+                if busy then
+                    SendNotify("You Are Already Doing Something.", 'error', 2000)
+                else
+                    FreezeEntityPosition(playerPed, true)
+                    LockInventory(true)
+                    busy = true
+                    doAnims(4)
+                    Wait(Config.CoreSettings.Timers.Pack)
+                    SendNotify("You Packed Chicken Legs.", 'success', 2000)
+                    TriggerServerEvent('lusty94_butcher:server:PackChickenLegs')
+                    ClearPedTasks(playerPed)
+                    busy = false
+                    LockInventory(false)
+                    FreezeEntityPosition(playerPed, false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
-            end
-        end)
-    else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end   
-end)
-------------------------------------------------------------< PROCESS CHICKEN START END >-----------------------------------
-
-
-
-------------------------------------------------------------< PACK CHICKEN START >-----------------------------------
-
-
-RegisterNetEvent('lusty94_butcher:client:SellChickenBreast', function(amount)
-    if onDuty then
-        QBCore.Functions.TriggerCallback('lusty94_butcher:get:ChickenBreastPack', function(HasItems)  
-            if HasItems then
-                local dialog = exports['qb-input']:ShowInput({
-                    header = "How Many Do You Want To Sell?",
-                    submitText = "Confirm",
-                    inputs = {
-                        {
-                            text = "Amount", -- text you want to be displayed as a place holder
-                            name = "amount", -- name of the input should be unique otherwise it might override
-                            type = "number", -- type of the input - number will not allow non-number characters in the field so only accepts 0-9
-                            isRequired = true, -- Optional [accepted values: true | false] but will submit the form if no value is inputted
-                        }
-                    },
-                })
-                if dialog then
-                    TriggerServerEvent('lusty94_butcher:server:SellChickenBreastPack', tonumber(dialog["amount"]))
-                end
-            else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing A Chicken Legs Or Food Packaging.", 'error', 2000)
             end
         end) 
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end 
-end)
-
-
-RegisterNetEvent('lusty94_butcher:client:SellChickenThighs', function(amount)
-    if onDuty then
-        QBCore.Functions.TriggerCallback('lusty94_butcher:get:ChickenThighsPack', function(HasItems)  
-            if HasItems then
-                local dialog = exports['qb-input']:ShowInput({
-                    header = "How Many Do You Want To Sell?",
-                    submitText = "Confirm",
-                    inputs = {
-                        {
-                            text = "Amount", -- text you want to be displayed as a place holder
-                            name = "amount", -- name of the input should be unique otherwise it might override
-                            type = "number", -- type of the input - number will not allow non-number characters in the field so only accepts 0-9
-                            isRequired = true, -- Optional [accepted values: true | false] but will submit the form if no value is inputted
-                        }
-                    },
-                })
-                if dialog then
-                    TriggerServerEvent('lusty94_butcher:server:SellChickenThighsPack', tonumber(dialog["amount"]))
-                end
-            else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
-            end
-        end)  
-    else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end  
-end)
-
-
-RegisterNetEvent('lusty94_butcher:client:SellChickenWings', function(amount)
-    if onDuty then
-        QBCore.Functions.TriggerCallback('lusty94_butcher:get:ChickenWingsPack', function(HasItems)  
-            if HasItems then
-                local dialog = exports['qb-input']:ShowInput({
-                    header = "How Many Do You Want To Sell?",
-                    submitText = "Confirm",
-                    inputs = {
-                        {
-                            text = "Amount", -- text you want to be displayed as a place holder
-                            name = "amount", -- name of the input should be unique otherwise it might override
-                            type = "number", -- type of the input - number will not allow non-number characters in the field so only accepts 0-9
-                            isRequired = true, -- Optional [accepted values: true | false] but will submit the form if no value is inputted
-                        }
-                    },
-                })
-                if dialog then
-                    TriggerServerEvent('lusty94_butcher:server:SellChickenWingsPack', tonumber(dialog["amount"]))
-                end
-            else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
-            end
-        end)
-     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
     end   
 end)
 
 
-RegisterNetEvent('lusty94_butcher:client:SellChickenDrumSticks', function(amount)
+
+
+
+
+--give items
+RegisterNetEvent('lusty94_butcher:client:GiveItems', function(args)
+    local args = tonumber(args)
     if onDuty then
-        QBCore.Functions.TriggerCallback('lusty94_butcher:get:ChickenDrumSticksPack', function(HasItems)  
-            if HasItems then
-                local dialog = exports['qb-input']:ShowInput({
-                    header = "How Many Do You Want To Sell?",
-                    submitText = "Confirm",
-                    inputs = {
-                        {
-                            text = "Amount", -- text you want to be displayed as a place holder
-                            name = "amount", -- name of the input should be unique otherwise it might override
-                            type = "number", -- type of the input - number will not allow non-number characters in the field so only accepts 0-9
-                            isRequired = true, -- Optional [accepted values: true | false] but will submit the form if no value is inputted
-                        }
-                    },
-                })
-                if dialog then
-                    TriggerServerEvent('lusty94_butcher:server:SellChickenDrumSticksPack', tonumber(dialog["amount"]))
-                end
-            else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
-            end
-        end)  
-    else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
+        if args == 1 then
+            TriggerServerEvent('lusty94_butcher:server:GiveItems', 1)
+        elseif args == 2 then
+            TriggerServerEvent('lusty94_butcher:server:GiveItems', 2)
         end
-    end 
+    else
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end
+end)
+
+-----------------------------------< SELLING CROPS >--------------------------------
+
+
+-- function to lock inventory to prevent exploits
+function LockInventory(toggle) -- big up to jim for how to do this
+	if toggle then
+        if InvType == 'qb' then
+            TriggerEvent('inventory:client:busy:status', true) TriggerEvent('canUseInventoryAndHotbar:toggle', false)
+        elseif InvType == 'ox' then
+            LocalPlayer.state:set("inv_busy", true, true)
+        end
+    else 
+        if InvType == 'qb' then
+         TriggerEvent('inventory:client:busy:status', false) TriggerEvent('canUseInventoryAndHotbar:toggle', true)
+        elseif InvType == 'ox' then
+            LocalPlayer.state:set("inv_busy", false, true)
+        end
+    end
+end
+
+--selling ped for butcher
+CreateThread(function()
+    RequestModel(GetHashKey(Config.Selling.PedModel))
+    while not HasModelLoaded(GetHashKey(Config.Selling.PedModel)) do
+        Wait(100)
+    end
+    local pedlocation = Config.Selling.Location
+    sellingPed = CreatePed(0, Config.Selling.PedModel, pedlocation, false, false)
+    FreezeEntityPosition(sellingPed, true)
+    SetEntityInvincible(sellingPed, true)
+    SetBlockingOfNonTemporaryEvents(sellingPed, true)
+    TaskStartScenarioInPlace(sellingPed, 'WORLD_HUMAN_CLIPBOARD', 0, true)
+    if TargetType == 'qb' then
+        exports['qb-target']:AddTargetEntity(sellingPed, {  options = { { icon = 'fa-solid fa-bars', label = 'Sell Chicken Products', event = 'lusty94_butcher:client:SellChickenMenu', } }, distance = 2.0, })
+    elseif TargetType == 'ox' then
+        exports.ox_target:addLocalEntity(sellingPed, { { name = 'sellingPed', icon = 'fa-solid fa-bars', label = 'Sell Chicken Products', event = 'lusty94_butcher:client:SellChickenMenu', distance = 2.0} })
+    end
 end)
 
 
-RegisterNetEvent('lusty94_butcher:client:SellChickenLegs', function(amount)
+--selling packaged chicken
+RegisterNetEvent('lusty94_butcher:client:SellItems', function(args)
+    local args = tonumber(args)
     if onDuty then
-        QBCore.Functions.TriggerCallback('lusty94_butcher:get:ChickenLegsPack', function(HasItems)  
-            if HasItems then
-                local dialog = exports['qb-input']:ShowInput({
-                    header = "How Many Do You Want To Sell?",
-                    submitText = "Confirm",
-                    inputs = {
-                        {
-                            text = "Amount", -- text you want to be displayed as a place holder
-                            name = "amount", -- name of the input should be unique otherwise it might override
-                            type = "number", -- type of the input - number will not allow non-number characters in the field so only accepts 0-9
-                            isRequired = true, -- Optional [accepted values: true | false] but will submit the form if no value is inputted
-                        }
-                    },
-                })
-                if dialog then
-                    TriggerServerEvent('lusty94_butcher:server:SellChickenLegsPack', tonumber(dialog["amount"]))
+        QBCore.Functions.TriggerCallback('lusty94_butcher:get:SellingItems', function(HasItems)  
+        if HasItems then
+                if selling then
+                    SendNotify("You Are Already Doing Something!", 'error', 2000)
+                else
+                    selling = true
+                    LockInventory(true)
+                    if args == 1 then
+                        TriggerServerEvent('lusty94_butcher:server:SellItems', 1)
+                        LockInventory(false)
+                        selling = false
+                    elseif args == 2 then
+                        TriggerServerEvent('lusty94_butcher:server:SellItems', 2)
+                        LockInventory(false)
+                        selling = false
+                    elseif args == 3 then
+                        TriggerServerEvent('lusty94_butcher:server:SellItems', 3)
+                        LockInventory(false)
+                        selling = false
+                    elseif args == 4 then
+                        TriggerServerEvent('lusty94_butcher:server:SellItems', 4)
+                        LockInventory(false)
+                        selling = false
+                    elseif args == 5 then
+                        TriggerServerEvent('lusty94_butcher:server:SellItems', 5)
+                        LockInventory(false)
+                        selling = false
+                    end
+                    LockInventory(false)
                 end
             else
-                ClearPedTasks(PlayerPedId())
-                if Config.CoreSettings.Notify.Type == 'qb' then
-                    QBCore.Functions.Notify("You Are Missing Items", "error", Config.CoreSettings.Notify.Length.Error)
-                elseif Config.CoreSettings.Notify.Type == 'okok' then
-                    exports['okokNotify']:Alert('Missing Items','You Are Missing Items', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-                elseif Config.CoreSettings.Notify.Type == 'boii' then
-                    exports['boii_ui']:notify('Missing Items', 'You Are Missing Items', 'error', Config.CoreSettings.Notify.Length.Error)
-                end
+                SendNotify("You Are Missing Items!", 'error', 2000)
             end
         end)
     else
-        if Config.CoreSettings.Notify.Type == 'qb' then
-            QBCore.Functions.Notify("You Need To Be Clocked In To Do This", "error", Config.CoreSettings.Notify.Length.Error)
-        elseif Config.CoreSettings.Notify.Type == 'okok' then
-            exports['okokNotify']:Alert('Not On Duty','You Need To Be Clocked In To Do This', Config.CoreSettings.Notify.Length.Error, 'error', Config.CoreSettings.Notify.Sound) 
-        elseif Config.CoreSettings.Notify.Type == 'mythic' then
-            exports['mythic_notify']:DoHudText('error', 'You Need To Be Clocked In To Do This!') 
-        elseif Config.CoreSettings.Notify.Type == 'boii' then
-            exports['boii_ui']:notify('Not On Duty', 'You Need To Be Clocked In To Do This', 'error', Config.CoreSettings.Notify.Length.Error)
-        end
-    end   
+        SendNotify("You Must Be On Duty To Do That.", 'error', 2000)
+    end
 end)
-------------------------------------------------------------< PROCESS CHICKEN START END >-----------------------------------
 
 
-
-
------------------------------------------< JOB & MANAGEMENT SECTION START >-----------------------------------------
+-----------------------------------------< JOB & MANAGEMENT >-----------------------------------------
 RegisterNetEvent("lusty94_butcher:client:ToggleDuty", function()
     TriggerServerEvent("QBCore:ToggleDuty")
 end)
@@ -2245,36 +620,43 @@ end)
 RegisterNetEvent('QBCore:Client:SetDuty', function(duty)
     onDuty = duty
 end)
--------------------------------------< JOB & MANAGEMENT SECTION END >----------------------------------------------
 
-
-
-
-
-
-AddEventHandler('onResourceStop', function(resourceName) if resourceName ~= GetCurrentResourceName() then return end
-if (GetCurrentResourceName() ~= resourceName) then
-end
-    print('^5--<^3!^5>-- ^7Lusty94 ^5| ^5--<^3!^5>--^5Butcher V1.1.0 Stopped Successfully^5--<^3!^5>--^7')
-    if TargetType == 'qb' then
-        exports['qb-target']:RemoveZone("ToggleDuty")
-        exports['qb-target']:RemoveZone("BossMenu")
-        exports['qb-target']:RemoveZone("ClothingLocker")
-        exports['qb-target']:RemoveZone("PickChicken")
-        exports['qb-target']:RemoveZone("PluckChicken")
-        exports['qb-target']:RemoveZone("PrepareChicken")
-        exports['qb-target']:RemoveZone("ProcessChicken")
-        exports['qb-target']:RemoveZone("PackChicken")
-        exports['qb-target']:RemoveZone("SellChicken")
-    elseif TargetType == 'ox' then
-        exports.ox_target:removeZone(1)
-        exports.ox_target:removeZone(2)
-        exports.ox_target:removeZone(3)
-        exports.ox_target:removeZone(4)
-        exports.ox_target:removeZone(5)
-        exports.ox_target:removeZone(6)
-        exports.ox_target:removeZone(7)
-        exports.ox_target:removeZone(8)
-        exports.ox_target:removeZone(9)
+RegisterNetEvent('lusty94_butcher:client:changeClothes', function()
+    if ClothingType == 'qb' then
+        TriggerEvent('qb-clothing:client:openOutfitMenu')
+    elseif ClothingType == 'illenium' then
+        TriggerEvent('qb-clothing:client:openOutfitMenu') -- illenium has backwards compat built in just make sure you have followed docs for illenium    
+    elseif ClothingType == 'custom' then
+        -- insert your own custom code for opening outfit menu in your clothing script
     end
+end)
+
+
+
+
+AddEventHandler('onResourceStop', function(resource)
+	if resource == GetCurrentResourceName() then
+        busy = false
+        selling = false
+        if TargetType == 'qb' then exports['qb-target']:RemoveTargetEntity(sellingPed, 'sellingPed') elseif TargetType == 'ox' then exports.ox_target:removeLocalEntity(sellingPed, 'sellingPed') end print('sellingPed - Targets Deleted') 
+        DeletePed(sellingPed) print('sellingPed - Ped Deleted')
+        if TargetType == 'qb' then
+            exports['qb-target']:RemoveZone("ToggleDuty")
+            exports['qb-target']:RemoveZone("ClothingLocker")
+            exports['qb-target']:RemoveZone("PickChicken")
+            exports['qb-target']:RemoveZone("PluckChicken")
+            exports['qb-target']:RemoveZone("PrepareChicken")
+            exports['qb-target']:RemoveZone("ProcessChicken")
+            exports['qb-target']:RemoveZone("PackChicken")
+        elseif TargetType == 'ox' then
+            exports.ox_target:removeZone(1)
+            exports.ox_target:removeZone(2)
+            exports.ox_target:removeZone(3)
+            exports.ox_target:removeZone(4)
+            exports.ox_target:removeZone(5)
+            exports.ox_target:removeZone(6)
+            exports.ox_target:removeZone(7)
+        end
+        print('^5--<^3!^5>-- ^7| Lusty94 |^5 ^5--<^3!^5>--^7 Butcher V1.2.0 Stopped Successfully ^5--<^3!^5>--^7')
+	end
 end)

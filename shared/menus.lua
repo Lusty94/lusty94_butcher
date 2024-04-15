@@ -11,41 +11,36 @@ local ProcessChickenMenu = {
     {   
         header = "Get A Butchers Knife",
         params = {
-            isServer = true,
-            event = "lusty94_butcher:server:GiveButcherKnife",
+            event = "lusty94_butcher:client:GiveItems",
+            args = 1,
         }
     },          
     {   
         header = "Process Chicken Breast",
-        txt = "Process Fresh Chicken Breast",
         params = {
             event = "lusty94_butcher:client:ProcessChickenBreast",
         }
     },          
     {   
         header = "Process Chicken Thighs",
-        txt = "Process Fresh Chicken Thighs",
         params = {
             event = "lusty94_butcher:client:ProcessChickenThighs",
         }
     },          
     {   
         header = "Process Chicken Wings",
-        txt = "Process Fresh Chicken Wings",
         params = {
             event = "lusty94_butcher:client:ProcessChickenWings",
         }
     },          
     {   
         header = "Process Chicken Drumsticks",
-        txt = "Process Fresh Chicken Drumsticks",
         params = {
             event = "lusty94_butcher:client:ProcessChickenDrumSticks",
         }
     },          
     {   
         header = "Process Chicken Legs",
-        txt = "Process Fresh Chicken Legs",
         params = {
             event = "lusty94_butcher:client:ProcessChickenLegs",
         }
@@ -65,36 +60,30 @@ lib.registerContext({
     options = {
       {
         title = 'Get A Butchers Knife',
-        icon = 'box',
-        onSelect = function()
-            TriggerServerEvent('lusty94_butcher:server:GiveButcherKnife')
-        end,
+        event = 'lusty94_butcher:client:GiveItems',
+        args = 1,
         arrow = true,
       },
       {
         title = 'Process Chicken Breast',
-        description = 'Process Fresh Chicken Breast',
         icon = 'box',
         event = 'lusty94_butcher:client:ProcessChickenBreast',
         arrow = true,
       },
       {
         title = 'Process Chicken Thighs',
-        description = 'Process Fresh Chicken Thighs',
         icon = 'box',
         event = 'lusty94_butcher:client:ProcessChickenThighs',
         arrow = true,
       },
       {
         title = 'Process Chicken Wings',
-        description = 'Process Fresh Chicken Wings',
         icon = 'box',
         event = 'lusty94_butcher:client:ProcessChickenWings',
         arrow = true,
       },
       {
         title = 'Process Chicken Drumsticks',
-        description = 'Process Fresh Chicken Drumsticks',
         icon = 'box',
         event = 'lusty94_butcher:client:ProcessChickenDrumSticks',
         arrow = true,
@@ -102,7 +91,6 @@ lib.registerContext({
       
       {
         title = 'Process Chicken Legs',
-        description = 'Process Fresh Chicken Legs',
         icon = 'box',
         event = 'lusty94_butcher:client:ProcessChickenLegs',
         arrow = true,
@@ -142,40 +130,36 @@ local PackChickenMenu = {
     {   
         header = "Get Food Packaging",
         params = {
-            event = "lusty94_butcher:client:GiveFoodPackaging",
+            event = "lusty94_butcher:client:GiveItems",
+            args = 2,
         }
     },  
     {   
         header = "Pack Chicken Breast",
-        txt = "Pack Fresh Chicken Breast Ready For Sale",
         params = {
             event = "lusty94_butcher:client:PackChickenBreast",
         }
     },          
     {   
         header = "Pack Chicken Thighs",
-        txt = "Pack Fresh Chicken Thighs Ready For Sale",
         params = {
             event = "lusty94_butcher:client:PackChickenThighs",
         }
     },          
     {   
         header = "Pack Chicken Wings",
-        txt = "Pack Fresh Chicken Wings Ready For Sale",
         params = {
             event = "lusty94_butcher:client:PackChickenWings",
         }
     },          
     {   
         header = "Pack Chicken Drumsticks",
-        txt = "Pack Fresh Chicken Drumsticks Ready For Sale",
         params = {
             event = "lusty94_butcher:client:PackChickenDrumSticks",
         }
     },          
     {   
         header = "Pack Chicken Legs",
-        txt = "Pack Fresh Chicken Legs Ready For Sale",
         params = {
             event = "lusty94_butcher:client:PackChickenLegs",
         }
@@ -195,41 +179,36 @@ lib.registerContext({
     options = {
       {
         title = 'Get Food Packaging',
-        icon = 'box',
-        event = 'lusty94_butcher:client:GiveFoodPackaging',
+        event = 'lusty94_butcher:client:GiveItems',
+        args = 2,
         arrow = true,
       },
       {
         title = 'Pack Chicken Breast',
-        description = 'Pack Fresh Chicken Breast Ready For Sale',
         icon = 'box',
         event = 'lusty94_butcher:client:PackChickenBreast',
         arrow = true,
       },
       {
         title = 'Pack Chicken Thighs',
-        description = 'Pack Fresh Chicken Thighs Ready For Sale',
         icon = 'box',
         event = 'lusty94_butcher:client:PackChickenThighs',
         arrow = true,
       },
       {
         title = 'Pack Chicken Wings',
-        description = 'Pack Fresh Chicken Wings Ready For Sale',
         icon = 'box',
         event = 'lusty94_butcher:client:PackChickenWings',
         arrow = true,
       },
       {
         title = 'Pack Chicken Drumsticks',
-        description = 'Pack Fresh Chicken Drumsticks Ready For Sale',
         icon = 'box',
         event = 'lusty94_butcher:client:PackChickenDrumSticks',
         arrow = true,
       },
       {
         title = 'Pack Chicken Legs',
-        description = 'Pack Fresh Chicken Legs Ready For Sale',
         icon = 'box',
         event = 'lusty94_butcher:client:PackChickenLegs',
         arrow = true,
@@ -264,37 +243,42 @@ local SellChickenMenu = {
     },  
     {   
         header = "Sell Chicken Breast Pack",
-        txt = "Sell Chicken Breast Pack For: " ..Config.ItemPrices.CashSymbol..Config.ItemPrices.SellItems["chickenbreastpack"]..' each',
+        txt = Config.Selling.CashSymbol..Config.Selling.Items.ChickenBreast.Price..' each',
         params = {
-            event = "lusty94_butcher:client:SellChickenBreast",
+            event = "lusty94_butcher:client:SellItems",
+            args = 1,
         }
     },          
     {   
         header = "Sell Chicken Thighs Pack",
-        txt = "Sell Chicken Thighs Pack For: " ..Config.ItemPrices.CashSymbol..Config.ItemPrices.SellItems["chickenthighspack"]..' each',
+        txt = Config.Selling.CashSymbol..Config.Selling.Items.ChickenThighs.Price..' each',
         params = {
-            event = "lusty94_butcher:client:SellChickenThighs",
+            event = "lusty94_butcher:client:SellItems",
+            args = 2,
         }
     },          
     {   
         header = "Sell Chicken Wings Pack",
-        txt = "Sell Chicken Wings Pack For: " ..Config.ItemPrices.CashSymbol..Config.ItemPrices.SellItems["chickenwingspack"]..' each',
+        txt = Config.Selling.CashSymbol..Config.Selling.Items.ChickenWings.Price..' each',
         params = {
-            event = "lusty94_butcher:client:SellChickenWings",
+            event = "lusty94_butcher:client:SellItems",
+            args = 3,
         }
     },          
     {   
         header = "Sell Chicken Drumsticks Pack",
-        txt = "Sell Chicken Drumsticks Pack For: " ..Config.ItemPrices.CashSymbol..Config.ItemPrices.SellItems["chickendrumstickspack"]..' each',
+        txt = Config.Selling.CashSymbol..Config.Selling.Items.ChickenDrumsticks.Price..' each',
         params = {
-            event = "lusty94_butcher:client:SellChickenDrumSticks",
+            event = "lusty94_butcher:client:SellItems",
+            args = 4,
         }
     },          
     {   
         header = "Sell Chicken Legs Pack",
-        txt = "Sell Chicken Legs Pack For: " ..Config.ItemPrices.CashSymbol..Config.ItemPrices.SellItems["chickenlegspack"]..' each',
+        txt = Config.Selling.CashSymbol..Config.Selling.Items.ChickenLegs.Price..' each',
         params = {
-            event = "lusty94_butcher:client:SellChickenLegs",
+            event = "lusty94_butcher:client:SellItems",
+            args = 5,
         }
     }, 
     {
@@ -312,38 +296,43 @@ lib.registerContext({
     options = {
       {
         title = 'Sell Chicken Breast Pack',
-        description = 'Sell Chicken Breast Pack For: ' ..Config.ItemPrices.CashSymbol..Config.ItemPrices.SellItems["chickenbreastpack"]..' each',
+        description = Config.Selling.CashSymbol..Config.Selling.Items.ChickenBreast.Price..' each',
         icon = 'money-bill',
-        event = 'lusty94_butcher:client:SellChickenBreast',
+        event = 'lusty94_butcher:client:SellItems',
+        args = 1,
         arrow = true,
       },
       {
         title = 'Sell Chicken Thighs Pack',
-        description = 'Sell Chicken Thighs Pack For: ' ..Config.ItemPrices.CashSymbol..Config.ItemPrices.SellItems["chickenthighspack"]..' each',
+        description = Config.Selling.CashSymbol..Config.Selling.Items.ChickenThighs.Price..' each',
         icon = 'money-bill',
-        event = 'lusty94_butcher:client:SellChickenThighs',
+        event = 'lusty94_butcher:client:SellItems',
+        args = 2,
         arrow = true,
       },
       {
         title = 'Sell Chicken Wings Pack',
-        description = 'Sell Chicken Wings Pack For: ' ..Config.ItemPrices.CashSymbol..Config.ItemPrices.SellItems["chickenwingspack"]..' each',
+        description = Config.Selling.CashSymbol..Config.Selling.Items.ChickenWings.Price..' each',
         icon = 'money-bill',
-        event = 'lusty94_butcher:client:SellChickenWings',
+        event = 'lusty94_butcher:client:SellItems',
+        args = 3,
         arrow = true,
       },
       {
         title = 'Sell Chicken Drumsticks Pack',
-        description = 'Sell Chicken Drumsticks Pack For: ' ..Config.ItemPrices.CashSymbol..Config.ItemPrices.SellItems["chickendrumstickspack"]..' each',
+        description = Config.Selling.CashSymbol..Config.Selling.Items.ChickenDrumsticks.Price..' each',
         icon = 'money-bill',
-        event = 'lusty94_butcher:client:SellChickenDrumSticks',
+        event = 'lusty94_butcher:client:SellItems',
+        args = 4,
         arrow = true,
       },
       
       {
         title = 'Sell Chicken Legs Pack',
-        description = 'Sell Chicken Legs Pack For: ' ..Config.ItemPrices.CashSymbol..Config.ItemPrices.SellItems["chickenlegspack"]..' each',
+        description = Config.Selling.CashSymbol..Config.Selling.Items.ChickenLegs.Price..' each',
         icon = 'money-bill',
-        event = 'lusty94_butcher:client:SellChickenLegs',
+        event = 'lusty94_butcher:client:SellItems',
+        args = 5,
         arrow = true,
       },
       

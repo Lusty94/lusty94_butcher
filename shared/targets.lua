@@ -1,4 +1,3 @@
-local QBCore = exports['qb-core']:GetCoreObject()
 local TargetType = Config.CoreSettings.Target.Type
 
 if TargetType == 'qb' then
@@ -21,25 +20,6 @@ if TargetType == 'qb' then
         },
         distance = 1.5,
     })    
-    --bossmenu
-    exports['qb-target']:AddBoxZone("BossMenu", Config.InteractionLocations.JobAreas.BossMenu.Location.Location, Config.InteractionLocations.JobAreas.BossMenu.Location.Height, Config.InteractionLocations.JobAreas.BossMenu.Location.Width, {
-        name = "BossMenu",
-        heading = Config.InteractionLocations.JobAreas.BossMenu.Location.Heading,
-        debugPoly = Config.DebugPoly,
-        minZ = Config.InteractionLocations.JobAreas.BossMenu.Location.MinZ,
-        maxZ = Config.InteractionLocations.JobAreas.BossMenu.Location.MaxZ,
-    }, {
-        options = {
-            {
-                
-                event = Config.CoreSettings.EventNames.BossMenu,
-                label = Config.InteractionLocations.JobAreas.BossMenu.Location.Label,
-                icon = Config.InteractionLocations.JobAreas.BossMenu.Location.Icon,
-                job = Config.CoreSettings.Job.Name
-            }
-        },
-        distance = 1.5,
-    })
     --clothing locker
     exports['qb-target']:AddBoxZone("ClothingLocker", Config.InteractionLocations.JobAreas.ClothingLockers.Location.Location, Config.InteractionLocations.JobAreas.ClothingLockers.Location.Height, Config.InteractionLocations.JobAreas.ClothingLockers.Location.Width, {
         name = "ClothingLocker",
@@ -51,13 +31,13 @@ if TargetType == 'qb' then
         options = {
             {
                 
-                event = Config.CoreSettings.EventNames.Clothing,
+                event = 'lusty94_butcher:client:changeClothes',
                 label = Config.InteractionLocations.JobAreas.ClothingLockers.Location.Label,
                 icon = Config.InteractionLocations.JobAreas.ClothingLockers.Location.Icon,
                 job = Config.CoreSettings.Job.Name
             }
         },
-        distance = 1.5,
+        distance = 2.5,
     })
     --pick chicken
     exports['qb-target']:AddBoxZone("PickChicken", Config.InteractionLocations.Preparation.PickChicken.Location.Location, Config.InteractionLocations.Preparation.PickChicken.Location.Height, Config.InteractionLocations.Preparation.PickChicken.Location.Width, {
@@ -154,25 +134,6 @@ if TargetType == 'qb' then
         },
         distance = 1.5,
     })
-    --sell chicken menu
-    exports['qb-target']:AddBoxZone("SellChicken", Config.InteractionLocations.Preparation.SellChicken.Location.Location, Config.InteractionLocations.Preparation.SellChicken.Location.Height, Config.InteractionLocations.Preparation.SellChicken.Location.Width, {
-        name = "SellChicken",
-        heading = Config.InteractionLocations.Preparation.SellChicken.Location.Heading,
-        debugPoly = Config.DebugPoly,
-        minZ = Config.InteractionLocations.Preparation.SellChicken.Location.MinZ,
-        maxZ = Config.InteractionLocations.Preparation.SellChicken.Location.MaxZ,
-    }, {
-        options = {
-            {
-                
-                event = "lusty94_butcher:client:SellChickenMenu",
-                label = Config.InteractionLocations.Preparation.SellChicken.Location.Label,
-                icon = Config.InteractionLocations.Preparation.SellChicken.Location.Icon,
-                job = Config.CoreSettings.Job.Name
-            }
-        },
-        distance = 1.5,
-    })
 elseif TargetType == 'ox' then
     --toggle duty
     exports.ox_target:addBoxZone({
@@ -187,22 +148,7 @@ elseif TargetType == 'ox' then
                 event = 'lusty94_butcher:client:ToggleDuty',
                 label = Config.InteractionLocations.JobAreas.Duty.Location.Label,
                 icon = Config.InteractionLocations.JobAreas.Duty.Location.Icon,
-            }
-        }
-    })
-    --boss menu
-    exports.ox_target:addBoxZone({
-        coords = Config.InteractionLocations.JobAreas.BossMenu.Location.Location,
-        size = Config.InteractionLocations.JobAreas.BossMenu.Location.Size,
-        rotation = Config.InteractionLocations.JobAreas.BossMenu.Location.Heading,
-        debug = Config.DebugPoly,
-        options = {
-            {
-                id = 2,
-                name = 'BossMenu',
-                event = Config.CoreSettings.EventNames.BossMenu,
-                label = Config.InteractionLocations.JobAreas.BossMenu.Location.Label,
-                icon = Config.InteractionLocations.JobAreas.BossMenu.Location.Icon,
+                groups = Config.CoreSettings.Job.Name,
             }
         }
     })
@@ -214,11 +160,12 @@ elseif TargetType == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
-                id = 3,
+                id = 2,
                 name = 'ClothingLockers',
-                event = Config.CoreSettings.EventNames.Clothing,
+                event = 'lusty94_butcher:client:changeClothes',
                 label = Config.InteractionLocations.JobAreas.ClothingLockers.Location.Label,
                 icon = Config.InteractionLocations.JobAreas.ClothingLockers.Location.Icon,
+                groups = Config.CoreSettings.Job.Name,
             }
         }
     })
@@ -230,11 +177,12 @@ elseif TargetType == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
-                id = 4,
+                id = 3,
                 name = 'PickChicken',
                 event = 'lusty94_butcher:client:PickChicken',
                 label = Config.InteractionLocations.Preparation.PickChicken.Location.Label,
                 icon = Config.InteractionLocations.Preparation.PickChicken.Location.Icon,
+                groups = Config.CoreSettings.Job.Name,
             }
         }
     })
@@ -246,11 +194,12 @@ elseif TargetType == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
-                id = 5,
+                id = 4,
                 name = 'PluckChicken',
                 event = 'lusty94_butcher:client:PluckChicken',
                 label = Config.InteractionLocations.Preparation.PluckChicken.Location.Label,
                 icon = Config.InteractionLocations.Preparation.PluckChicken.Location.Icon,
+                groups = Config.CoreSettings.Job.Name,
             }
         }
     })
@@ -262,11 +211,12 @@ elseif TargetType == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
-                id = 6,
+                id = 5,
                 name = 'PrepareChicken',
                 event = 'lusty94_butcher:client:ProcessChicken',
                 label = Config.InteractionLocations.Preparation.PrepareChicken.Location.Label,
                 icon = Config.InteractionLocations.Preparation.PrepareChicken.Location.Icon,
+                groups = Config.CoreSettings.Job.Name,
             }
         }
     })
@@ -278,11 +228,12 @@ elseif TargetType == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
-                id = 7,
+                id = 6,
                 name = 'ProcessChicken',
                 event = 'lusty94_butcher:client:ProcessChickenMenu',
                 label = Config.InteractionLocations.Preparation.ProcessChicken.Location.Label,
                 icon = Config.InteractionLocations.Preparation.ProcessChicken.Location.Icon,
+                groups = Config.CoreSettings.Job.Name,
             }
         }
     })
@@ -294,27 +245,12 @@ elseif TargetType == 'ox' then
         debug = Config.DebugPoly,
         options = {
             {
-                id = 8,
+                id = 7,
                 name = 'PackChicken',
                 event = 'lusty94_butcher:client:PackChickenMenu',
                 label = Config.InteractionLocations.Preparation.PackChicken.Location.Label,
                 icon = Config.InteractionLocations.Preparation.PackChicken.Location.Icon,
-            }
-        }
-    })
-    --sell chicken menu
-    exports.ox_target:addBoxZone({
-        coords = Config.InteractionLocations.Preparation.SellChicken.Location.Location,
-        size = Config.InteractionLocations.Preparation.SellChicken.Location.Size,
-        rotation = Config.InteractionLocations.Preparation.SellChicken.Location.Heading,
-        debug = Config.DebugPoly,
-        options = {
-            {
-                id = 9,
-                name = 'SellChicken',
-                event = 'lusty94_butcher:client:SellChickenMenu',
-                label = Config.InteractionLocations.Preparation.SellChicken.Location.Label,
-                icon = Config.InteractionLocations.Preparation.SellChicken.Location.Icon,
+                groups = Config.CoreSettings.Job.Name,
             }
         }
     })
