@@ -4,8 +4,8 @@ local NotifyType = Config.CoreSettings.Notify.Type
 
 
 --notification function
-function SendNotify(src, msg, type, time, title)
-    if not title then title = "Notification" end
+local function SendNotify(src, msg, type, time, title)
+    if not title then title = "Buthcer" end
     if not time then time = 5000 end
     if not type then type = 'success' end
     if not msg then print("Notification Sent With No Message") return end
@@ -131,11 +131,11 @@ end)
 QBCore.Functions.CreateCallback('lusty94_butcher:get:SellingItems', function(source, cb)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    local item1 = Player.Functions.GetItemByName(Config.Selling.Items.ChickenBreast.RequiredItemName)
-    local item2 = Player.Functions.GetItemByName(Config.Selling.Items.ChickenThighs.RequiredItemName)
-    local item3 = Player.Functions.GetItemByName(Config.Selling.Items.ChickenWings.RequiredItemName)
-    local item4 = Player.Functions.GetItemByName(Config.Selling.Items.ChickenDrumsticks.RequiredItemName)
-    local item5 = Player.Functions.GetItemByName(Config.Selling.Items.ChickenLegs.RequiredItemName)
+    local item1 = Player.Functions.GetItemByName('chickenbreastpack')
+    local item2 = Player.Functions.GetItemByName('chickenthighspack')
+    local item3 = Player.Functions.GetItemByName('chickenwingspack')
+    local item4 = Player.Functions.GetItemByName('chickendrumstickspack')
+    local item5 = Player.Functions.GetItemByName('chickenlegspack')
     if item1 or item2 or item3 or item4 or item5 then
         cb(true)
     else
@@ -150,7 +150,7 @@ end)
 
 
 --give items
-RegisterNetEvent('lusty94_butcher:server:GiveItems', function(args)
+RegisterNetEvent('lusty94_butcher:server:GiveItems', function(args, amount)
     local args = tonumber(args)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
@@ -168,11 +168,11 @@ RegisterNetEvent('lusty94_butcher:server:GiveItems', function(args)
         end
     elseif args == 2 then
         if InvType == 'qb' then        
-            Player.Functions.AddItem("foodpackaging", 1)
-            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "add")
+            Player.Functions.AddItem("foodpackaging", amount)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "add", amount)
         elseif InvType == 'ox' then
-            if exports.ox_inventory:CanCarryItem(src, "foodpackaging", 1) then
-                exports.ox_inventory:AddItem(src,"foodpackaging", 1)
+            if exports.ox_inventory:CanCarryItem(src, "foodpackaging", amount) then
+                exports.ox_inventory:AddItem(src,"foodpackaging", amount)
             else
                 SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
             end
@@ -209,8 +209,9 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChicken', function()
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "add")
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "processedchicken", 1) then
-            exports.ox_inventory:RemoveItem(src,"pluckedchicken", 1)
-            exports.ox_inventory:AddItem(src,"processedchicken", 1)
+             if exports.ox_inventory:RemoveItem(src,"pluckedchicken", 1) then
+                exports.ox_inventory:AddItem(src,"processedchicken", 1)
+             end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
@@ -226,11 +227,12 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChickenBreast', function()
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")
         Player.Functions.AddItem("chickenbreast", 2)
-        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreast"], "add")
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreast"], "add", 2)
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "chickenbreast", 2) then
-            exports.ox_inventory:RemoveItem(src,"processedchicken", 1)
-            exports.ox_inventory:AddItem(src,"chickenbreast", 2)
+            if exports.ox_inventory:RemoveItem(src,"processedchicken", 1) then
+                exports.ox_inventory:AddItem(src,"chickenbreast", 2)
+            end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
@@ -245,11 +247,12 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChickenThighs', function()
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")        
         Player.Functions.AddItem("chickenthighs", 2)
-        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighs"], "add")
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighs"], "add", 2)
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "chickenthighs", 2) then
-            exports.ox_inventory:RemoveItem(src,"processedchicken", 1)
-            exports.ox_inventory:AddItem(src,"chickenthighs", 2)
+            if exports.ox_inventory:RemoveItem(src,"processedchicken", 1) then
+                exports.ox_inventory:AddItem(src,"chickenthighs", 2)
+            end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
@@ -264,11 +267,12 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChickenWings', function()
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")        
         Player.Functions.AddItem("chickenwings", 2)
-        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwings"], "add")
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwings"], "add", 2)
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "chickenwings", 2) then
-            exports.ox_inventory:RemoveItem(src,"processedchicken", 1)
-            exports.ox_inventory:AddItem(src,"chickenwings", 2)
+            if exports.ox_inventory:RemoveItem(src,"processedchicken", 1) then
+                exports.ox_inventory:AddItem(src,"chickenwings", 2)
+            end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
@@ -283,11 +287,12 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChickenDrumSticks', function()
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")          
         Player.Functions.AddItem("chickendrumsticks", 2)
-        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumsticks"], "add")
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumsticks"], "add", 2)
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "chickendrumsticks", 2) then
-            exports.ox_inventory:RemoveItem(src,"processedchicken", 1)
-            exports.ox_inventory:AddItem(src,"chickendrumsticks", 2)
+            if exports.ox_inventory:RemoveItem(src,"processedchicken", 1) then
+                exports.ox_inventory:AddItem(src,"chickendrumsticks", 2)
+            end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
@@ -302,18 +307,17 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChickenLegs', function()
         Player.Functions.RemoveItem("processedchicken", 1)
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")         
         Player.Functions.AddItem("chickenlegs", 2)
-        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegs"], "add")
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegs"], "add", 2)
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "chickenlegs", 2) then
-            exports.ox_inventory:RemoveItem(src,"processedchicken", 1)
-            exports.ox_inventory:AddItem(src,"chickenlegs", 2)
+            if exports.ox_inventory:RemoveItem(src,"processedchicken", 1) then
+                exports.ox_inventory:AddItem(src,"chickenlegs", 2)
+            end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
     end 
 end)
-
-
 
 
 
@@ -331,18 +335,15 @@ RegisterNetEvent('lusty94_butcher:server:PackChickenBreast', function()
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreastpack"], "add")
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "chickenbreastpack", 1) then
-            exports.ox_inventory:RemoveItem(src,"chickenbreast", 1)
-            exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
-            exports.ox_inventory:AddItem(src,"chickenbreastpack", 1)
+            if exports.ox_inventory:RemoveItem(src,"chickenbreast", 1) then
+                exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
+                exports.ox_inventory:AddItem(src,"chickenbreastpack", 1)
+            end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
     end 
 end)
-
-
-
-
 
 --chicken thighs pack
 RegisterNetEvent('lusty94_butcher:server:PackChickenThighs', function()
@@ -357,17 +358,15 @@ RegisterNetEvent('lusty94_butcher:server:PackChickenThighs', function()
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighspack"], "add")
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "chickenthighspack", 1) then
-            exports.ox_inventory:RemoveItem(src,"chickenthighs", 1)
-            exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
-            exports.ox_inventory:AddItem(src,"chickenthighspack", 1)
+            if exports.ox_inventory:RemoveItem(src,"chickenthighs", 1) then
+                exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
+                exports.ox_inventory:AddItem(src,"chickenthighspack", 1)
+            end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
     end 
 end)
-
-
-
 
 --chicken wings pack
 RegisterNetEvent('lusty94_butcher:server:PackChickenWings', function()
@@ -382,18 +381,15 @@ RegisterNetEvent('lusty94_butcher:server:PackChickenWings', function()
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwingspack"], "add")
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "chickenwingspack", 1) then
-            exports.ox_inventory:RemoveItem(src,"chickenwings", 1)
-            exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
-            exports.ox_inventory:AddItem(src,"chickenwingspack", 1)
+            if exports.ox_inventory:RemoveItem(src,"chickenwings", 1) then
+                exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
+                exports.ox_inventory:AddItem(src,"chickenwingspack", 1)
+            end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
     end 
 end)
-
-
-
-
 
 --chicken drumsticks pack
 RegisterNetEvent('lusty94_butcher:server:PackChickenDrumSticks', function()
@@ -408,17 +404,15 @@ RegisterNetEvent('lusty94_butcher:server:PackChickenDrumSticks', function()
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumstickspack"], "add")
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "chickendrumstickspack", 1) then
-            exports.ox_inventory:RemoveItem(src,"chickendrumsticks", 1)
-            exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
-            exports.ox_inventory:AddItem(src,"chickendrumstickspack", 1)
+            if exports.ox_inventory:RemoveItem(src,"chickendrumsticks", 1) then
+                exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
+                exports.ox_inventory:AddItem(src,"chickendrumstickspack", 1)
+            end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
     end 
 end)
-
-
-
 
 --chicken legs pack
 RegisterNetEvent('lusty94_butcher:server:PackChickenLegs', function()
@@ -433,9 +427,10 @@ RegisterNetEvent('lusty94_butcher:server:PackChickenLegs', function()
         TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegspack"], "add")
     elseif InvType == 'ox' then
         if exports.ox_inventory:CanCarryItem(src, "chickenlegspack", 1) then
-            exports.ox_inventory:RemoveItem(src,"chickenlegs", 1)
-            exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
-            exports.ox_inventory:AddItem(src,"chickenlegspack", 1)
+            if exports.ox_inventory:RemoveItem(src,"chickenlegs", 1) then
+                exports.ox_inventory:RemoveItem(src,"foodpackaging", 1)
+                exports.ox_inventory:AddItem(src,"chickenlegspack", 1)
+            end
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
@@ -456,92 +451,91 @@ RegisterNetEvent('lusty94_butcher:server:SellItems', function(args)
     if not Player then return end
     if args == 1 then --chicken breast
         local price = Config.Selling.Items.ChickenBreast.Price
-        local itemName = Player.Functions.GetItemByName(Config.Selling.Items.ChickenBreast.RequiredItemName)
+        local itemName = Player.Functions.GetItemByName('chickenbreastpack')
         if itemName then
             local itemCount = itemName.amount
             if InvType == 'qb' then
-                Player.Functions.RemoveItem(itemName, itemCount)
-                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items[itemName], "remove")
+                Player.Functions.RemoveItem('chickenbreastpack', itemCount)
+                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items['chickenbreastpack'], "remove", itemCount)
                 Player.Functions.AddMoney('cash', price * itemCount, "butcher-sales")
             elseif InvType == 'ox' then
-                exports.ox_inventory:RemoveItem(src, itemName, itemCount)
-                exports.ox_inventory:AddItem(src, "money", price * itemCount)                   
+                if exports.ox_inventory:RemoveItem(src, 'chickenbreastpack', itemCount) then
+                    exports.ox_inventory:AddItem(src, "money", price * itemCount)                   
+                end
             end
         else
             SendNotify(src,"You Don\'t Have Anything To Sell!", 'error', 2000)
         end
     elseif args == 2 then --chicken thighs
         local price = Config.Selling.Items.ChickenThighs.Price
-        local itemName = Player.Functions.GetItemByName(Config.Selling.Items.ChickenThighs.RequiredItemName)
+        local itemName = Player.Functions.GetItemByName('chickenthighspack')
         if itemName then
             local itemCount = itemName.amount
             if InvType == 'qb' then
-                Player.Functions.RemoveItem(itemName, itemCount)
-                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items[itemName], "remove")
+                Player.Functions.RemoveItem('chickenthighspack', itemCount)
+                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items['chickenthighspack'], "remove", itemCount)
                 Player.Functions.AddMoney('cash', price * itemCount, "butcher-sales")
             elseif InvType == 'ox' then
-                exports.ox_inventory:RemoveItem(src, itemName, itemCount)
-                exports.ox_inventory:AddItem(src, "money", price * itemCount)                   
+                if exports.ox_inventory:RemoveItem(src, 'chickenthighspack', itemCount) then
+                    exports.ox_inventory:AddItem(src, "money", price * itemCount)                   
+                end
             end
         else
             SendNotify(src,"You Don\'t Have Anything To Sell!", 'error', 2000)
         end
     elseif args == 3 then --chicken wings
         local price = Config.Selling.Items.ChickenWings.Price
-        local itemName = Player.Functions.GetItemByName(Config.Selling.Items.ChickenWings.RequiredItemName)
+        local itemName = Player.Functions.GetItemByName('chickenwingspack')
         if itemName then
             local itemCount = itemName.amount
             if InvType == 'qb' then
-                Player.Functions.RemoveItem(itemName, itemCount)
-                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items[itemName], "remove")
+                Player.Functions.RemoveItem('chickenwingspack', itemCount)
+                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items['chickenwingspack'], "remove", itemCount)
                 Player.Functions.AddMoney('cash', price * itemCount, "butcher-sales")
             elseif InvType == 'ox' then
-                exports.ox_inventory:RemoveItem(src, itemName, itemCount)
-                exports.ox_inventory:AddItem(src, "money", price * itemCount)                   
+                if exports.ox_inventory:RemoveItem(src, 'chickenwingspack', itemCount) then
+                    exports.ox_inventory:AddItem(src, "money", price * itemCount)
+                end
             end
         else
             SendNotify(src,"You Don\'t Have Anything To Sell!", 'error', 2000)
         end
     elseif args == 4 then --chicken drumsticks
         local price = Config.Selling.Items.ChickenDrumsticks.Price
-        local itemName = Player.Functions.GetItemByName(Config.Selling.Items.ChickenDrumsticks.RequiredItemName)
+        local itemName = Player.Functions.GetItemByName('chickendrumstickspack')
         if itemName then
             local itemCount = itemName.amount
             if InvType == 'qb' then
-                Player.Functions.RemoveItem(itemName, itemCount)
-                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items[itemName], "remove")
+                Player.Functions.RemoveItem('chickendrumstickspack', itemCount)
+                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items['chickendrumstickspack'], "remove", itemCount)
                 Player.Functions.AddMoney('cash', price * itemCount, "butcher-sales")
             elseif InvType == 'ox' then
-                exports.ox_inventory:RemoveItem(src, itemName, itemCount)
-                exports.ox_inventory:AddItem(src, "money", price * itemCount)                   
+                if exports.ox_inventory:RemoveItem(src, 'chickendrumstickspack', itemCount) then
+                    exports.ox_inventory:AddItem(src, "money", price * itemCount)
+                end
             end
         else
             SendNotify(src,"You Don\'t Have Anything To Sell!", 'error', 2000)
         end
     elseif args == 5 then --chicken legs
         local price = Config.Selling.Items.ChickenLegs.Price
-        local itemName = Player.Functions.GetItemByName(Config.Selling.Items.ChickenLegs.RequiredItemName)
+        local itemName = Player.Functions.GetItemByName('chickenlegspack')
         if itemName then
             local itemCount = itemName.amount
             if InvType == 'qb' then
-                Player.Functions.RemoveItem(itemName, itemCount)
-                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items[itemName], "remove")
+                Player.Functions.RemoveItem('chickenlegspack', itemCount)
+                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items['chickenlegspack'], "remove", itemCount)
                 Player.Functions.AddMoney('cash', price * itemCount, "butcher-sales")
             elseif InvType == 'ox' then
-                exports.ox_inventory:RemoveItem(src, itemName, itemCount)
-                exports.ox_inventory:AddItem(src, "money", price * itemCount)                   
+                if exports.ox_inventory:RemoveItem(src, 'chickenlegspack', itemCount) then
+                    exports.ox_inventory:AddItem(src, "money", price * itemCount)
+                end
             end
         else
             SendNotify(src,"You Don\'t Have Anything To Sell!", 'error', 2000)
         end
     end
 end)
-
-
-
-
-
-
 
 
 local function CheckVersion()
@@ -555,7 +549,3 @@ local function CheckVersion()
 	end)
 end
 CheckVersion()
-
-
-
-

@@ -45,8 +45,6 @@ Config.CoreSettings = {
         --use 'mythic' for myhthic_notify
         --use 'boii' for boii_ui notify
         --use 'ox' for ox_lib notify
-        Sound = true, -- use sound for OKOK notifications ONLY
-        Length = { Success = 5000, Error = 5000, },
     }, 
     Clothing = {
         Type = 'qb' -- clothing type, support for qb-clothing and illenium-appearance
@@ -63,10 +61,10 @@ Config.CoreSettings = {
         --use 'custom' for your own custom menu
     },
     Timers = {
-        Pick = 3000, -- time to pick chicken
-        Pluck = 3000, -- time to pluck chicken
-        Process = 3000, -- time to process chicken
-        Pack = 3000, -- time to pack chicken
+        Pick = 5000, -- time to pick chicken
+        Pluck = 10000, -- time to pluck chicken
+        Process = 10000, -- time to process chicken
+        Pack = 10000, -- time to pack chicken
     },
 }
 
@@ -74,16 +72,15 @@ Config.CoreSettings = {
 
 
 Config.InteractionLocations = {
+    --name must be unique, size is for ox_target only, job must match job in core and in Cofig.CoreSettings.Job.Name
     JobAreas = {
-        Duty = {            Location = { Location = vector3(-70.16, 6256.38, 31.2),     Width = 0.5, Height = 0.5, Heading = 30.94,     MinZ = 31, MaxZ = 31.5, Icon = 'fa-solid fa-clipboard',       Label = 'Toggle Duty',     Size = vec3(0.5,0.5,0.5), }, },
-        ClothingLockers = { Location = { Location = vector3(-75.64, 6250.66, 31.09),    Width = 5.0, Height = 1.0, Heading = 120.14,    MinZ = 30, MaxZ = 32,   Icon = 'fa-solid fa-shirt',           Label = 'Change Clothing', Size = vec3(5.0,1.0,2), }, },
-    },
-    Preparation = {
-        PickChicken = {     Location = { Location = vector3(-69.06, 6249.45, 30.92),    Width = 2.0, Height = 2.0, Heading = 300.27,    MinZ = 30, MaxZ = 32,   Icon = 'fa-solid fa-hand-point-up',   Label = 'Pick Fresh Chicken',           Size = vec3(2,2,2), }, },
-        PluckChicken = {    Location = { Location = vector3(-89.33, 6234.58, 31.33),    Width = 3.0, Height = 1.5, Heading = 120,       MinZ = 30, MaxZ = 32,   Icon = 'fa-solid fa-hand',            Label = 'Pluck Fresh Chicken',          Size = vec3(3.0,1.5,1), }, },
-        PrepareChicken = {  Location = { Location = vector3(-79.03, 6228.83, 31.08),    Width = 2.5, Height = 2.0, Heading = 123.13,    MinZ = 30, MaxZ = 32,   Icon = 'fa-solid fa-hand',            Label = 'Process Plucked Chicken',      Size = vec3(2.5,2.0,1), }, },
-        ProcessChicken = {  Location = { Location = vector3(-99.79, 6210.99, 31.03),    Width = 2.5, Height = 2.0, Heading = 43.63,     MinZ = 30, MaxZ = 32,   Icon = 'fa-solid fa-hand',            Label = 'Prepare Processed Chicken',    Size = vec3(2.5,2.0,1), }, },
-        PackChicken = {     Location = { Location = vector3(-103.98, 6206.8, 31.03),    Width = 2.5, Height = 2.0, Heading = 43.63,     MinZ = 30, MaxZ = 32,   Icon = 'fa-solid fa-box',             Label = 'Pack Fresh Chicken Products',  Size = vec3(2.5,2.0,1), }, },
+        { name = 'butcherduty',                 coords = vector3(-70.16, 6256.38, 31.2),    size =  vec3(0.5,0.5,0.5), width = 0.5, height = 0.5, heading = 31.0,   minz = 31.0, maxz = 31.5, icon = 'fa-solid fa-clipboard',           label = 'Toggle Duty',               event = 'lusty94_butcher:client:ToggleDuty',           job = 'butcher', distance = 2.0, },
+        { name = 'butcherclothing',             coords = vector3(-75.64, 6250.66, 31.09),   size =  vec3(5.0,1.0,2.0), width = 1.0, height = 5.0, heading = 120.14, minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-shirt',               label = 'Change Clothing',           event = 'lusty94_butcher:client:changeClothes',        job = 'butcher', distance = 2.0, },
+        { name = 'butcherpickchicken',          coords = vector3(-69.06, 6249.45, 30.92),   size =  vec3(2.0,2.0,2.0), width = 2.0, height = 2.0, heading = 300.27, minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Pick Fresh Chicken',        event = 'lusty94_butcher:client:PickChicken',          job = 'butcher', distance = 2.0, },
+        { name = 'butcherpluckchicken',         coords = vector3(-89.33, 6234.58, 31.33),   size =  vec3(3.0,1.5,1.0), width = 1.5, height = 3.0, heading = 120.0,  minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Pluck Fresh Chicken',       event = 'lusty94_butcher:client:PluckChicken',         job = 'butcher', distance = 2.0, },
+        { name = 'butcherpreparechicken',       coords = vector3(-79.03, 6228.83, 31.08),   size =  vec3(2.5,2.0,1.0), width = 2.5, height = 2.0, heading = 123.13, minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Process Plucked Chicken',   event = 'lusty94_butcher:client:ProcessChicken',       job = 'butcher', distance = 2.0, },
+        { name = 'butcherprocesschicken',       coords = vector3(-99.79, 6210.99, 31.03),   size =  vec3(2.5,2.0,1.0), width = 2.5, height = 2.0, heading = 43.63,  minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Prepare Processed Chicken', event = 'lusty94_butcher:client:ProcessChickenMenu',   job = 'butcher', distance = 2.0, },
+        { name = 'butcherpackchicken',          coords = vector3(-103.98, 6206.8, 31.03),   size =  vec3(2.5,2.0,1.0), width = 2.5, height = 2.0, heading = 43.63,  minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Pack Chicken Products',     event = 'lusty94_butcher:client:PackChickenMenu',      job = 'butcher', distance = 2.0, },
     },
 }
 
@@ -95,19 +92,19 @@ Config.Selling = {
     CashSymbol = '£', -- cash symbol used in your server
     Location = vector4(-111.69, 6195.82, 30.03, 310.19), -- location to spawn factory worker ped 
     PedModel =  's_m_y_factory_01', -- name of ped model
-    Items = { -- price is sell price for EACH UNIT of that particular item - requiredItemName is the item name in your items.lua
-        ChickenBreast =      { Price = 14,    RequiredItemName = 'chickenbreastpack', },
-        ChickenThighs =      { Price = 10,    RequiredItemName = 'chickenthighspack', },
-        ChickenWings =       { Price = 8,     RequiredItemName = 'chickenwingspack', },
-        ChickenDrumsticks =  { Price = 8,     RequiredItemName = 'chickendrumstickspack', },
-        ChickenLegs =        { Price = 5,     RequiredItemName = 'chickenlegspack', },
+    Items = { -- price is sell price for EACH UNIT of that particular item
+        ChickenBreast =      { Price = 14,},
+        ChickenThighs =      { Price = 10,},
+        ChickenWings =       { Price = 8,},
+        ChickenDrumsticks =  { Price = 8,},
+        ChickenLegs =        { Price = 5,},
     },
 }
 
 
 Config.Animations = {
-    PickChicken = {     dict = "mini@repair", anim = "fixing_a_player", flag = 11, },
-    PluckChicken = {    dict = "mini@repair", anim = "fixing_a_player", flag = 11,  },
-    ProcessChicken = {  dict = "amb@prop_human_bbq@male@idle_a", anim = "idle_b", flag = 41,  },
-    PackChicken = {     dict = "mini@repair", anim = "fixing_a_player", flag = 11,  },
+    PickChicken = {     dict = "mini@repair", anim = "fixing_a_player",},
+    PluckChicken = {    dict = "mini@repair", anim = "fixing_a_player",},
+    ProcessChicken = {  dict = "amb@prop_human_bbq@male@idle_a", anim = "idle_b",},
+    PackChicken = {     dict = "mini@repair", anim = "fixing_a_player",},
 }
