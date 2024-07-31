@@ -37,6 +37,7 @@ Config.CoreSettings = {
         Type = 'qb', -- support for qb-inventory and ox_inventory
         --use 'qb' for qb-inventory
         --use 'ox' for ox_inventory
+        --use 'codem' for codem-inventory
     },
     Notify = {
         Type = 'qb', -- notification type, support for qb-core notify, okokNotify, mythic_notify, boii_ui notify and ox_lib notify
