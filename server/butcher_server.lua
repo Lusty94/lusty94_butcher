@@ -165,6 +165,9 @@ RegisterNetEvent('lusty94_butcher:server:GiveItems', function(args, amount)
             else
                 SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
             end
+        elseif InvType == 'codem' then        
+                Player.Functions.AddItem("butcherknife", 1)
+                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["butcherknife"], "add")
         end
     elseif args == 2 then
         if InvType == 'qb' then        
@@ -176,6 +179,9 @@ RegisterNetEvent('lusty94_butcher:server:GiveItems', function(args, amount)
             else
                 SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
             end
+        elseif InvType == 'codem' then        
+                Player.Functions.AddItem("foodpackaging", amount)
+                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "add", amount)
         end
     end
 end)
@@ -193,6 +199,9 @@ RegisterNetEvent('lusty94_butcher:server:PluckChicken', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType =='codem' then
+        Player.Functions.AddItem("pluckedchicken", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["pluckedchicken"], "add")
     end  
 end)
 
@@ -215,6 +224,11 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChicken', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then
+        Player.Functions.RemoveItem("pluckedchicken", 1)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["pluckedchicken"], "remove")        
+            Player.Functions.AddItem("processedchicken", 1)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "add")
     end 
 end)
 
@@ -236,6 +250,11 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChickenBreast', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then        
+            Player.Functions.RemoveItem("processedchicken", 1)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")
+            Player.Functions.AddItem("chickenbreast", 2)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreast"], "add", 2)
     end 
 end)
 
@@ -256,6 +275,11 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChickenThighs', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then
+            Player.Functions.RemoveItem("processedchicken", 1)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")        
+            Player.Functions.AddItem("chickenthighs", 2)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighs"], "add", 2)
     end 
 end)
 
@@ -276,6 +300,11 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChickenWings', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then
+        Player.Functions.RemoveItem("processedchicken", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")        
+        Player.Functions.AddItem("chickenwings", 2)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwings"], "add", 2)
     end 
 end)
 
@@ -296,6 +325,11 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChickenDrumSticks', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then
+        Player.Functions.RemoveItem("processedchicken", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")          
+        Player.Functions.AddItem("chickendrumsticks", 2)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumsticks"], "add", 2)
     end 
 end)
 
@@ -316,6 +350,11 @@ RegisterNetEvent('lusty94_butcher:server:ProcessChickenLegs', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then 
+        Player.Functions.RemoveItem("processedchicken", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["processedchicken"], "remove")         
+        Player.Functions.AddItem("chickenlegs", 2)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegs"], "add", 2)
     end 
 end)
 
@@ -342,6 +381,13 @@ RegisterNetEvent('lusty94_butcher:server:PackChickenBreast', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then 
+        Player.Functions.RemoveItem("chickenbreast", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreast"], "remove")         
+        Player.Functions.RemoveItem("foodpackaging", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
+        Player.Functions.AddItem("chickenbreastpack", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenbreastpack"], "add")
     end 
 end)
 
@@ -365,6 +411,13 @@ RegisterNetEvent('lusty94_butcher:server:PackChickenThighs', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then
+        Player.Functions.RemoveItem("chickenthighs", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighs"], "remove")         
+        Player.Functions.RemoveItem("foodpackaging", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
+        Player.Functions.AddItem("chickenthighspack", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenthighspack"], "add")
     end 
 end)
 
@@ -388,6 +441,13 @@ RegisterNetEvent('lusty94_butcher:server:PackChickenWings', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then
+        Player.Functions.RemoveItem("chickenwings", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwings"], "remove")         
+        Player.Functions.RemoveItem("foodpackaging", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
+        Player.Functions.AddItem("chickenwingspack", 1)
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenwingspack"], "add")
     end 
 end)
 
@@ -411,6 +471,13 @@ RegisterNetEvent('lusty94_butcher:server:PackChickenDrumSticks', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then 
+            Player.Functions.RemoveItem("chickendrumsticks", 1)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumsticks"], "remove")         
+            Player.Functions.RemoveItem("foodpackaging", 1)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
+            Player.Functions.AddItem("chickendrumstickspack", 1)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickendrumstickspack"], "add")
     end 
 end)
 
@@ -434,6 +501,13 @@ RegisterNetEvent('lusty94_butcher:server:PackChickenLegs', function()
         else
             SendNotify(src,"You Can\'t Carry Anymore of This Item!", 'error', 2000)
         end
+    elseif InvType == 'codem' then
+            Player.Functions.RemoveItem("chickenlegs", 1)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegs"], "remove")         
+            Player.Functions.RemoveItem("foodpackaging", 1)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["foodpackaging"], "remove")         
+            Player.Functions.AddItem("chickenlegspack", 1)
+            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items["chickenlegspack"], "add")
     end 
 end)
 
@@ -462,6 +536,10 @@ RegisterNetEvent('lusty94_butcher:server:SellItems', function(args)
                 if exports.ox_inventory:RemoveItem(src, 'chickenbreastpack', itemCount) then
                     exports.ox_inventory:AddItem(src, "money", price * itemCount)                   
                 end
+            elseif InvType == 'codem' then
+                    Player.Functions.RemoveItem('chickenbreastpack', itemCount)
+                    TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items['chickenbreastpack'], "remove", itemCount)
+                    Player.Functions.AddMoney('cash', price * itemCount, "butcher-sales")
             end
         else
             SendNotify(src,"You Don\'t Have Anything To Sell!", 'error', 2000)
@@ -479,6 +557,11 @@ RegisterNetEvent('lusty94_butcher:server:SellItems', function(args)
                 if exports.ox_inventory:RemoveItem(src, 'chickenthighspack', itemCount) then
                     exports.ox_inventory:AddItem(src, "money", price * itemCount)                   
                 end
+            elseif InvType == 'codem' then
+                    Player.Functions.RemoveItem('chickenthighspack', itemCount)
+                    TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items['chickenthighspack'], "remove", itemCount)
+                    Player.Functions.AddMoney('cash', price * itemCount, "butcher-sales")
+
             end
         else
             SendNotify(src,"You Don\'t Have Anything To Sell!", 'error', 2000)
@@ -496,6 +579,10 @@ RegisterNetEvent('lusty94_butcher:server:SellItems', function(args)
                 if exports.ox_inventory:RemoveItem(src, 'chickenwingspack', itemCount) then
                     exports.ox_inventory:AddItem(src, "money", price * itemCount)
                 end
+            elseif InvType == 'codem' then
+                Player.Functions.RemoveItem('chickenwingspack', itemCount)
+                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items['chickenwingspack'], "remove", itemCount)
+                Player.Functions.AddMoney('cash', price * itemCount, "butcher-sales")
             end
         else
             SendNotify(src,"You Don\'t Have Anything To Sell!", 'error', 2000)
@@ -513,6 +600,10 @@ RegisterNetEvent('lusty94_butcher:server:SellItems', function(args)
                 if exports.ox_inventory:RemoveItem(src, 'chickendrumstickspack', itemCount) then
                     exports.ox_inventory:AddItem(src, "money", price * itemCount)
                 end
+            elseif InvType == 'codem' then
+                Player.Functions.RemoveItem('chickendrumstickspack', itemCount)
+                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items['chickendrumstickspack'], "remove", itemCount)
+                Player.Functions.AddMoney('cash', price * itemCount, "butcher-sales")
             end
         else
             SendNotify(src,"You Don\'t Have Anything To Sell!", 'error', 2000)
@@ -530,6 +621,10 @@ RegisterNetEvent('lusty94_butcher:server:SellItems', function(args)
                 if exports.ox_inventory:RemoveItem(src, 'chickenlegspack', itemCount) then
                     exports.ox_inventory:AddItem(src, "money", price * itemCount)
                 end
+            elseif InvType == 'codem' then
+                Player.Functions.RemoveItem('chickenlegspack', itemCount)
+                TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items['chickenlegspack'], "remove", itemCount)
+                Player.Functions.AddMoney('cash', price * itemCount, "butcher-sales")
             end
         else
             SendNotify(src,"You Don\'t Have Anything To Sell!", 'error', 2000)
