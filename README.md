@@ -1,4 +1,4 @@
-## Lusty94_Ammunation
+## Lusty94_Ammunation  (Edit by Procastinator)
 
 
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -33,10 +33,10 @@ SCRIPT SUPPORT VIA DISCORD: https://discord.gg/BJGFrThmA8
 
 
 - [qb-core](https://github.com/qbcore-framework/qb-core)
-- [qb-target](https://github.com/qbcore-framework/qb-target)
+- [qb-target](https://github.com/qbcore-framework/qb-target)/[ox_target](https://github.com/overextended/ox_target)
 - [qb-menu](https://github.com/qbcore-framework/qb-menu)
-- [qb-inventory](https://github.com/qbcore-framework/qb-inventory)
 - [ox_lib](https://github.com/overextended/ox_lib/releases/)
+- [qb-inventory](https://github.com/qbcore-framework/qb-inventory)/[ox_inventory](https://github.com/overextended/ox_inventory)/[codem-inventory](https://forum.cfx.re/t/codem-minventory-advanced-inventory-system/5167702)
 
 
 
@@ -46,6 +46,9 @@ SCRIPT SUPPORT VIA DISCORD: https://discord.gg/BJGFrThmA8
 - Add the ##JOB snippet below to your core/shared/jobs.lua
 - Add all .png images inside [images] folder into your inventory/html/images folder - ox_inventory users place images inside inventory/web/images
 - Add your own methods of obtaining the butcher job - perhaps city hall?
+
+## Only follow the below step if you are using codem-inventory
+Add the items to both qb-core/shared/item.lua and codem-inventory/config/itemlist.lua.
 
 ## JOB
 
@@ -84,6 +87,8 @@ SCRIPT SUPPORT VIA DISCORD: https://discord.gg/BJGFrThmA8
 	chickenlegspack 					    = {name = 'chickenlegspack', 			 	  	    label = 'Chicken Legs Pack', 		    weight = 200, 		type = 'item', 					image = 'chickenlegspack.png', 			        unique = false, 	useable = false, 	shouldClose = true,   combinable = nil,   description = 'Fresh Chicken Legs Pack Ready For Delivery'},
 
 ```
+
+
 
 
 
