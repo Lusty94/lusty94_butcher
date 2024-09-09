@@ -8,26 +8,6 @@ PlayerJob = {}
 
 
 
-------------------------------< BLIPS >-------------------------------------
-CreateThread(function()
-    for k, v in pairs(Config.Blips) do
-        if v.useblip then
-            v.blip = AddBlipForCoord(v['coords'].x, v['coords'].y, v['coords'].z)
-            SetBlipSprite(v.blip, v.id)
-            SetBlipDisplay(v.blip, 4)
-            SetBlipScale(v.blip, v.scale)
-            SetBlipColour(v.blip, v.colour)
-            SetBlipAsShortRange(v.blip, true)
-            BeginTextCommandSetBlipName('STRING')
-            AddTextComponentString(v.title)
-            EndTextCommandSetBlipName(v.blip)
-        end
-    end
-end)
-
-
-
---------------------------< FUNCTIONS >------------------------
 
 --notification function
 local function SendNotify(msg,type,time,title)
@@ -50,7 +30,38 @@ local function SendNotify(msg,type,time,title)
 end
 
 
+--blips
+CreateThread(function()
+    for k, v in pairs(Config.Blips) do
+        if v.useblip then
+            v.blip = AddBlipForCoord(v.coords.x, v.coords.y, v.coords.z)
+            SetBlipSprite(v.blip, v.id)
+            SetBlipDisplay(v.blip, 4)
+            SetBlipScale(v.blip, v.scale)
+            SetBlipColour(v.blip, v.colour)
+            SetBlipAsShortRange(v.blip, true)
+            BeginTextCommandSetBlipName('STRING')
+            AddTextComponentString(v.title)
+            EndTextCommandSetBlipName(v.blip)
+        end
+    end
+end)
 
+--selling ped
+CreateThread(function()
+    lib.requestModel(Config.Selling.PedModel, 5000)
+    butcherPed = CreatePed(0, Config.Selling.PedModel, Config.Selling.Location.x, Config.Selling.Location.y, Config.Selling.Location.z, false, false)
+    SetEntityHeading(butcherPed, Config.Selling.Location.w)
+    FreezeEntityPosition(butcherPed, true)
+    SetEntityInvincible(butcherPed, true)
+    SetBlockingOfNonTemporaryEvents(butcherPed, true)
+    TaskStartScenarioInPlace(butcherPed, 'WORLD_HUMAN_CLIPBOARD', 0, true)
+    if TargetType == 'qb' then
+        exports['qb-target']:AddTargetEntity(butcherPed, {  options = { { icon = 'fa-solid fa-bars', label = 'Sell Chicken Products', event = 'lusty94_butcher:client:SellChickenMenu', job = Config.CoreSettings.Job.Name,} }, distance = 1.0, })
+    elseif TargetType == 'ox' then
+        exports.ox_target:addLocalEntity(butcherPed, { { name = 'butcherPed', icon = 'fa-solid fa-bars', label = 'Sell Chicken Products', event = 'lusty94_butcher:client:SellChickenMenu', groups = Config.CoreSettings.Job.Name, distance = 1.0} })
+    end
+end)
 
 
 
@@ -58,6 +69,7 @@ end
 -------------------------------------< PICK CHICKEN >----------------------------------
 
 RegisterNetEvent('lusty94_butcher:client:PickChicken', function()
+    local playerPed = PlayerPedId()
     if onDuty then
         if busy then
             SendNotify("You are already doing something.", 'error', 2000)
@@ -67,31 +79,34 @@ RegisterNetEvent('lusty94_butcher:client:PickChicken', function()
             else
                 busy = true
                 LockInventory(true)
-                FreezeEntityPosition(PlayerPedId(), true) 
-                if lib.progressCircle({ duration = Config.CoreSettings.Timers.Pick, label = 'Picking chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.PickChicken.dict, clip = Config.Animations.PickChicken.anim,},}) then
-                    local playerCoords = GetEntityCoords(PlayerPedId())
+                if lib.progressCircle({ 
+                    duration = Config.CoreSettings.Timers.Pick, 
+                    label = 'Picking chicken...', 
+                    position = 'bottom', 
+                    useWhileDead = false, 
+                    canCancel = true, 
+                    disable = { car = true, move = true, }, 
+                    anim = { dict = Config.Animations.PickChicken.dict, clip = Config.Animations.PickChicken.anim,},
+                }) then
+                    local playerCoords = GetEntityCoords(playerPed)
                     local chickenModel = 'a_c_hen'
-                    RequestModel(chickenModel)
-                    while not HasModelLoaded(chickenModel) do
-                        Wait(500)
-                    end            
+                    lib.requestModel(chickenModel, 5000)         
                     chickenPed = CreatePed(0, chickenModel, playerCoords.x, playerCoords.y, playerCoords.z, 0, true, true)
-                    AttachEntityToEntity(chickenPed, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 57005), 0.12, 0.0, 0.0, 0.0, 255.0, 30.0, true, true, false, true, 1, true)
+                    AttachEntityToEntity(chickenPed, playerPed, GetPedBoneIndex(playerPed, 57005), 0.12, 0.0, 0.0, 0.0, 255.0, 30.0, true, true, false, true, 1, true)
                     local dict = 'move_weapon@jerrycan@generic'
                     local anim = 'idle'
                     RequestAnimDict(dict)
                     while not HasAnimDictLoaded(dict) do
-                        Wait(100)
+                        Wait(1000)
                     end
-                    TaskPlayAnim(PlayerPedId(), dict, anim, 1.0, -1.0, 1.0, 51, 11, 0, 0, 0)
+                    TaskPlayAnim(playerPed, dict, anim, 1.0, -1.0, 1.0, 51, 11, 0, 0, 0)
                     busy = false
                     LockInventory(false)
-                    FreezeEntityPosition(PlayerPedId(), false)
                     SendNotify("You picked a chicken, now go and pluck it.", 'success', 2000) 
                 else 
                     busy = false
                     LockInventory(false)
-                    ClearPedTasks(PlayerPedId())
+                    ClearPedTasks(playerPed)
                     SendNotify('Action cancelled.', 'error', 2000)
                 end
                 
@@ -113,21 +128,24 @@ RegisterNetEvent('lusty94_butcher:client:PluckChicken', function()
                 if success then
                     busy = true
                     LockInventory(true)
-                    FreezeEntityPosition(PlayerPedId(), true) 
-                    if lib.progressCircle({ duration = Config.CoreSettings.Timers.Pluck, label = 'Plucking chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.PluckChicken.dict, clip = Config.Animations.PluckChicken.anim,},}) then
+                    if lib.progressCircle({ 
+                        duration = Config.CoreSettings.Timers.Pluck, 
+                        label = 'Plucking chicken...', 
+                        position = 'bottom', 
+                        useWhileDead = false, 
+                        canCancel = true, 
+                        disable = { car = true, move = true, },
+                        anim = { dict = Config.Animations.PluckChicken.dict, clip = Config.Animations.PluckChicken.anim,},
+                    }) then
                         busy = false
                         LockInventory(false)
-                        ClearPedTasks(PlayerPedId())
                         DeleteEntity(chickenPed)
                         TriggerServerEvent('lusty94_butcher:server:PluckChicken')
                         SendNotify("You plucked a chicken now go process it.", 'success', 2000)
-                        FreezeEntityPosition(PlayerPedId(), false)
                     else 
                         busy = false
                         LockInventory(false)
-                        ClearPedTasks(PlayerPedId())
                         SendNotify('Action cancelled.', 'error', 2000)
-                        FreezeEntityPosition(PlayerPedId(), false)
                     end
                 else
                     SendNotify("Action failed.", 'error', 2000)
@@ -155,20 +173,23 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChicken', function()
                     if success then
                         busy = true
                         LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true) 
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Process, label = 'Processing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,},}) then
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Process, 
+                            label = 'Processing chicken...', 
+                            position = 'bottom', 
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, }, 
+                            anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             TriggerServerEvent('lusty94_butcher:server:ProcessChicken')
                             SendNotify("You processed a chicken.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -195,20 +216,24 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChickenBreast', function()
                     if success then
                         busy = true
                         LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true)
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Process, label = 'Processing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,}, prop = { model = 'v_ind_cfknife', bone = 57005, pos = vec3(0.2, 0.14, -0.01), rot = vec3(1.0, 4.0, 57.0),},}) then
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Process, 
+                            label = 'Processing chicken...', 
+                            position = 'bottom', 
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, },
+                            anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,}, 
+                            prop = { model = 'v_ind_cfknife', bone = 57005, pos = vec3(0.2, 0.14, -0.01), rot = vec3(1.0, 4.0, 57.0),},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             TriggerServerEvent('lusty94_butcher:server:ProcessChickenBreast')
                             SendNotify("You processed a chicken into breasts.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -235,20 +260,24 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChickenThighs', function()
                     if success then
                         busy = true
                         LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true)
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Process, label = 'Processing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,}, prop = { model = 'v_ind_cfknife', bone = 57005, pos = vec3(0.2, 0.14, -0.01), rot = vec3(1.0, 4.0, 57.0),},}) then
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Process, 
+                            label = 'Processing chicken...', 
+                            position = 'bottom', 
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, },
+                            anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,}, 
+                            prop = { model = 'v_ind_cfknife', bone = 57005, pos = vec3(0.2, 0.14, -0.01), rot = vec3(1.0, 4.0, 57.0),},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             TriggerServerEvent('lusty94_butcher:server:ProcessChickenThighs')
                             SendNotify("You processed a chicken into thighs.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -275,21 +304,24 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChickenWings', function()
                     if success then
                         busy = true
                         LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true)
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Process, label = 'Processing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,}, prop = { model = 'v_ind_cfknife', bone = 57005, pos = vec3(0.2, 0.14, -0.01), rot = vec3(1.0, 4.0, 57.0),},}) then
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Process, 
+                            label = 'Processing chicken...', 
+                            position = 'bottom', 
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, },
+                            anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,}, 
+                            prop = { model = 'v_ind_cfknife', bone = 57005, pos = vec3(0.2, 0.14, -0.01), rot = vec3(1.0, 4.0, 57.0),},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
-                            DeleteObject(knife)
                             TriggerServerEvent('lusty94_butcher:server:ProcessChickenWings')
                             SendNotify("You processed a chicken into wings.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -316,21 +348,24 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChickenDrumSticks', function()
                     if success then
                         busy = true
                         LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true)
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Process, label = 'Processing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,}, prop = { model = 'v_ind_cfknife', bone = 57005, pos = vec3(0.2, 0.14, -0.01), rot = vec3(1.0, 4.0, 57.0),},}) then
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Process, 
+                            label = 'Processing chicken...', 
+                            position = 'bottom', 
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, },
+                            anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,}, 
+                            prop = { model = 'v_ind_cfknife', bone = 57005, pos = vec3(0.2, 0.14, -0.01), rot = vec3(1.0, 4.0, 57.0),},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
-                            DeleteObject(knife)
                             TriggerServerEvent('lusty94_butcher:server:ProcessChickenDrumSticks')
                             SendNotify("You processed a chicken into drum sticks.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -356,22 +391,25 @@ RegisterNetEvent('lusty94_butcher:client:ProcessChickenLegs', function()
                     local success = lib.skillCheck({'easy', 'easy', 'easy', 'easy', 'easy'}, {'e'})
                     if success then
                         busy = true
-                        LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true) 
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Process, label = 'Processing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,}, prop = { model = 'v_ind_cfknife', bone = 57005, pos = vec3(0.2, 0.14, -0.01), rot = vec3(1.0, 4.0, 57.0),},}) then
+                        LockInventory(true) 
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Process, 
+                            label = 'Processing chicken...', 
+                            position = 'bottom', 
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, },
+                            anim = { dict = Config.Animations.ProcessChicken.dict, clip = Config.Animations.ProcessChicken.anim,}, 
+                            prop = { model = 'v_ind_cfknife', bone = 57005, pos = vec3(0.2, 0.14, -0.01), rot = vec3(1.0, 4.0, 57.0),},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
-                            DeleteObject(knife)
                             TriggerServerEvent('lusty94_butcher:server:ProcessChickenLegs')
                             SendNotify("You processed a chicken into legs.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -400,20 +438,23 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenBreast', function()
                     if success then
                         busy = true
                         LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true)
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Pack, label = 'Packing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.PackChicken.dict, clip = Config.Animations.PackChicken.anim,},}) then
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Pack, 
+                            label = 'Packing chicken...', 
+                            position = 'bottom',
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, },
+                            anim = { dict = Config.Animations.PackChicken.dict, clip = Config.Animations.PackChicken.anim,},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             TriggerServerEvent('lusty94_butcher:server:PackChickenBreast')
                             SendNotify("You packed chicken breast.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -440,20 +481,23 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenThighs', function()
                     if success then
                         busy = true
                         LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true)
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Pack, label = 'Packing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.PackChicken.dict, clip = Config.Animations.PackChicken.anim,},}) then
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Pack, 
+                            label = 'Packing chicken...', 
+                            position = 'bottom', 
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, },
+                            anim = { dict = Config.Animations.PackChicken.dict, clip = Config.Animations.PackChicken.anim,},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             TriggerServerEvent('lusty94_butcher:server:PackChickenThighs')
                             SendNotify("You packed chicken thighs.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -480,20 +524,23 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenWings', function()
                     if success then
                         busy = true
                         LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true)
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Pack, label = 'Packing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.PackChicken.dict, clip = Config.Animations.PackChicken.anim,},}) then
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Pack, 
+                            label = 'Packing chicken...', 
+                            position = 'bottom', 
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, },
+                            anim = { dict = Config.Animations.PackChicken.dict, clip = Config.Animations.PackChicken.anim,},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             TriggerServerEvent('lusty94_butcher:server:PackChickenWings')
                             SendNotify("You packed chicken wings.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -520,20 +567,23 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenDrumSticks', function()
                     if success then
                         busy = true
                         LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true)
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Pack, label = 'Packing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.PackChicken.dict, clip = Config.Animations.PackChicken.anim,},}) then
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Pack, 
+                            label = 'Packing chicken...', 
+                            position = 'bottom', 
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, },
+                            anim = { dict = Config.Animations.PackChicken.dict, clip = Config.Animations.PackChicken.anim,},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             TriggerServerEvent('lusty94_butcher:server:PackChickenDrumSticks')
                             SendNotify("You packed chicken drum sticks.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -560,20 +610,23 @@ RegisterNetEvent('lusty94_butcher:client:PackChickenLegs', function()
                     if success then
                         busy = true
                         LockInventory(true)
-                        FreezeEntityPosition(PlayerPedId(), true)
-                        if lib.progressCircle({ duration = Config.CoreSettings.Timers.Pack, label = 'Packing chicken...', position = 'bottom', useWhileDead = false, canCancel = true, disable = { car = true, }, anim = { dict = Config.Animations.PackChicken.dict, clip = Config.Animations.PackChicken.anim,},}) then
+                        if lib.progressCircle({ 
+                            duration = Config.CoreSettings.Timers.Pack, 
+                            label = 'Packing chicken...', 
+                            position = 'bottom', 
+                            useWhileDead = false, 
+                            canCancel = true, 
+                            disable = { car = true, move = true, },
+                            anim = { dict = Config.Animations.PackChicken.dict, clip = Config.Animations.PackChicken.anim,},
+                        }) then
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             TriggerServerEvent('lusty94_butcher:server:PackChickenLegs')
                             SendNotify("You packed chicken legs.", 'success', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         else 
                             busy = false
                             LockInventory(false)
-                            ClearPedTasks(PlayerPedId())
                             SendNotify('Action cancelled.', 'error', 2000)
-                            FreezeEntityPosition(PlayerPedId(), false)
                         end
                     else
                         SendNotify("Action failed.", 'error', 2000)
@@ -591,121 +644,94 @@ end)
 
 
 
-
-
 --give items
-RegisterNetEvent('lusty94_butcher:client:GiveItems', function(args)
-    local args = tonumber(args)
+RegisterNetEvent('lusty94_butcher:client:GiveItems', function()
     if onDuty then
-        if args == 1 then
-            TriggerServerEvent('lusty94_butcher:server:GiveItems', 1)
-        elseif args == 2 then
-            local input = lib.inputDialog('Butcher Supplies', {
-                {type = 'number', label = 'Food Packaging', description = 'How much do you need?', icon = 'arrow-right'},
-              })
-            if input then
-                TriggerServerEvent('lusty94_butcher:server:GiveItems', 2, tonumber(input[1]))
-            end
+        local input = lib.inputDialog('Butcher Supplies', {
+            {type = 'number', label = 'Food Packaging', description = 'How much do you need?', icon = 'arrow-right'},
+            })
+        if input then
+            TriggerServerEvent('lusty94_butcher:server:GiveItems', 2, tonumber(input[1]))
         end
     else
         SendNotify("You must be on duty to proceed.", 'error', 2000)
     end
 end)
 
------------------------------------< SELLING CROPS >--------------------------------
+
+
+--function to display item images
+function ItemImage(img)
+	if InvType == 'ox' then
+		return "nui://ox_inventory/web/images/".. img.. '.png'
+	elseif InvType == 'qb' then
+		return "nui://qb-inventory/html/images/".. QBCore.Shared.Items[img].image
+	end
+end
 
 
 -- function to lock inventory to prevent exploits
 function LockInventory(toggle) -- big up to jim for how to do this
 	if toggle then
         LocalPlayer.state:set("inv_busy", true, true) -- used by qb, ps and ox
-
         --this is the old method below
         --[[ 
-        
         if InvType == 'qb' then
             this is for the old method if using old qb and ox
             TriggerEvent('inventory:client:busy:status', true) TriggerEvent('canUseInventoryAndHotbar:toggle', false)
         elseif InvType == 'ox' then
             LocalPlayer.state:set("inv_busy", true, true)
-        end 
-        
+        end         
         ]]
     else 
         LocalPlayer.state:set("inv_busy", false, true) -- used by qb, ps and ox
-
         --this is the old method below
-        --[[
-        
+        --[[        
         if InvType == 'qb' then
             this is for the old method if using old qb and ox
          TriggerEvent('inventory:client:busy:status', false) TriggerEvent('canUseInventoryAndHotbar:toggle', true)
         elseif InvType == 'ox' then
             LocalPlayer.state:set("inv_busy", false, true)
-        end
-        
+        end        
         ]]
     end
 end
 
---selling ped for butcher
-CreateThread(function()
-    RequestModel(GetHashKey(Config.Selling.PedModel))
-    while not HasModelLoaded(GetHashKey(Config.Selling.PedModel)) do
-        Wait(1000)
-    end
-    local pedlocation = Config.Selling.Location
-    sellingPed = CreatePed(0, Config.Selling.PedModel, pedlocation, false, false)
-    FreezeEntityPosition(sellingPed, true)
-    SetEntityInvincible(sellingPed, true)
-    SetBlockingOfNonTemporaryEvents(sellingPed, true)
-    TaskStartScenarioInPlace(sellingPed, 'WORLD_HUMAN_CLIPBOARD', 0, true)
-    if TargetType == 'qb' then
-        exports['qb-target']:AddTargetEntity(sellingPed, {  options = { { icon = 'fa-solid fa-bars', label = 'Sell Chicken Products', event = 'lusty94_butcher:client:SellChickenMenu', job = Config.CoreSettings.Job.Name,} }, distance = 2.0, })
-    elseif TargetType == 'ox' then
-        exports.ox_target:addLocalEntity(sellingPed, { { name = 'sellingPed', icon = 'fa-solid fa-bars', label = 'Sell Chicken Products', event = 'lusty94_butcher:client:SellChickenMenu', groups = Config.CoreSettings.Job.Name, distance = 2.0} })
-    end
-end)
+
 
 
 --selling packaged chicken
 RegisterNetEvent('lusty94_butcher:client:SellItems', function(args)
     local args = tonumber(args)
     if onDuty then
-        QBCore.Functions.TriggerCallback('lusty94_butcher:get:SellingItems', function(HasItems)  
-        if HasItems then
-                if busy then
-                    SendNotify("You Are Already Doing Something!", 'error', 2000)
-                else
-                    busy = true
-                    LockInventory(true)
-                    if args == 1 then
-                        TriggerServerEvent('lusty94_butcher:server:SellItems', 1)
-                        LockInventory(false)
-                        busy = false
-                    elseif args == 2 then
-                        TriggerServerEvent('lusty94_butcher:server:SellItems', 2)
-                        LockInventory(false)
-                        busy = false
-                    elseif args == 3 then
-                        TriggerServerEvent('lusty94_butcher:server:SellItems', 3)
-                        LockInventory(false)
-                        busy = false
-                    elseif args == 4 then
-                        TriggerServerEvent('lusty94_butcher:server:SellItems', 4)
-                        LockInventory(false)
-                        busy = false
-                    elseif args == 5 then
-                        TriggerServerEvent('lusty94_butcher:server:SellItems', 5)
-                        LockInventory(false)
-                        busy = false
-                    end
-                    LockInventory(false)
-                end
-            else
-                SendNotify("You are missing items!", 'error', 2000)
+        if busy then
+            SendNotify("You Are Already Doing Something!", 'error', 2000)
+        else
+            busy = true
+            LockInventory(true)
+            if args == 1 then
+                TriggerServerEvent('lusty94_butcher:server:SellItems', 1)
+                LockInventory(false)
+                busy = false
+            elseif args == 2 then
+                TriggerServerEvent('lusty94_butcher:server:SellItems', 2)
+                LockInventory(false)
+                busy = false
+            elseif args == 3 then
+                TriggerServerEvent('lusty94_butcher:server:SellItems', 3)
+                LockInventory(false)
+                busy = false
+            elseif args == 4 then
+                TriggerServerEvent('lusty94_butcher:server:SellItems', 4)
+                LockInventory(false)
+                busy = false
+            elseif args == 5 then
+                TriggerServerEvent('lusty94_butcher:server:SellItems', 5)
+                LockInventory(false)
+                busy = false
             end
-        end)
+            LockInventory(false)
+        end
     else
         SendNotify("You must be on duty to proceed.", 'error', 2000)
     end
@@ -753,13 +779,12 @@ end)
 AddEventHandler('onResourceStop', function(resource)
 	if resource == GetCurrentResourceName() then
         busy = false
-        if TargetType == 'qb' then exports['qb-target']:RemoveTargetEntity(sellingPed, 'sellingPed') elseif TargetType == 'ox' then exports.ox_target:removeLocalEntity(sellingPed, 'sellingPed') end
-        DeletePed(sellingPed)
+        if TargetType == 'qb' then exports['qb-target']:RemoveTargetEntity(butcherPed, 'butcherPed') elseif TargetType == 'ox' then exports.ox_target:removeLocalEntity(butcherPed, 'butcherPed') end
+        DeletePed(butcherPed)
         for k, v in pairs(Config.InteractionLocations.JobAreas) do if TargetType == 'qb' then exports['qb-target']:RemoveZone(v.name) elseif TargetType == 'ox' then exports.ox_target:removeZone(v.name) end end
         if IsEntityAttached(chickenPed) then
             DeletePed(chickenPed)
-            ClearPedTasks(PlayerPedId())
         end
-        print('^5--<^3!^5>-- ^7| Lusty94 |^5 ^5--<^3!^5>--^7 Butcher Job V2.0.0 Stopped Successfully ^5--<^3!^5>--^7')
+        print('^5--<^3!^5>-- ^7| Lusty94 |^5 ^5--<^3!^5>--^7 Butcher Job V2.0.1 Stopped Successfully ^5--<^3!^5>--^7')
     end
 end)

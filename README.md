@@ -1,4 +1,4 @@
-## Lusty94_Ammunation
+## Lusty94_Butcher
 
 
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -25,16 +25,12 @@ SCRIPT SUPPORT VIA DISCORD: https://discord.gg/BJGFrThmA8
 
 
 
-## IMPORTANT INFORMATION
-- The latest version of qb-inventory 2.0 is NOT supported, you will need to downgrade to a previous version or use ox_inventory
-
 
 ## DEPENDENCIES
 
 
 - [qb-core](https://github.com/qbcore-framework/qb-core)
 - [qb-target](https://github.com/qbcore-framework/qb-target)
-- [qb-menu](https://github.com/qbcore-framework/qb-menu)
 - [qb-inventory](https://github.com/qbcore-framework/qb-inventory)
 - [ox_lib](https://github.com/overextended/ox_lib/releases/)
 
@@ -42,7 +38,7 @@ SCRIPT SUPPORT VIA DISCORD: https://discord.gg/BJGFrThmA8
 
 ## INSTALLATION
 
-- Add the ##ITEMS snippet below into your core/shared/items.lua file
+- Add the ##ITEMS snippet below into your core/shared/items.lua file - ox_inventory users place the snippet in inventory/data/items.lua
 - Add the ##JOB snippet below to your core/shared/jobs.lua
 - Add all .png images inside [images] folder into your inventory/html/images folder - ox_inventory users place images inside inventory/web/images
 - Add your own methods of obtaining the butcher job - perhaps city hall?
@@ -57,8 +53,7 @@ SCRIPT SUPPORT VIA DISCORD: https://discord.gg/BJGFrThmA8
 ```
 
 
-
-## ITEMS
+## QB-CORE ITEMS
 
 
 ```
@@ -85,6 +80,175 @@ SCRIPT SUPPORT VIA DISCORD: https://discord.gg/BJGFrThmA8
 
 ```
 
+## OX_INVEOTRY ITEMS
 
+```
+
+	["freshchicken"] = {
+		label = "Fresh Chicken",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken Ready For Plucking",
+		client = {
+			image = "freshchicken.png",
+		}
+	},
+
+	["butcherknife"] = {
+		label = "Butcher Knife",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "A Sharp Knife Used By Butchers",
+		client = {
+			image = "butcherknife.png",
+		}
+	},
+
+	["processedchicken"] = {
+		label = "Processed Chicken",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Processed Chicken Ready For Packing",
+		client = {
+			image = "processedchicken.png",
+		}
+	},
+
+	["chickenwings"] = {
+		label = "Chicken wings",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken Wings Ready For Packing",
+		client = {
+			image = "chickenwings.png",
+		}
+	},
+
+	["chickenlegs"] = {
+		label = "Chicken Legs",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken Legs Ready For Packing",
+		client = {
+			image = "chickenlegs.png",
+		}
+	},
+
+	["chickendrumstickspack"] = {
+		label = "Chicken Drumsticks Pack",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken Drumsticks Pack Ready For Delivery",
+		client = {
+			image = "chickendrumstickspack.png",
+		}
+	},
+
+	["chickenthighs"] = {
+		label = "Chicken Thighs",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken Thighs Ready For Packing",
+		client = {
+			image = "chickenthighs.png",
+		}
+	},
+
+	["chickendrumsticks"] = {
+		label = "Chicken Drumsticks",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken Drumsticks Ready For Packing",
+		client = {
+			image = "chickendrumsticks.png",
+		}
+	},
+
+	["chickenthighspack"] = {
+		label = "Chicken Thighs Pack",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken Thighs Pack Ready For Delivery",
+		client = {
+			image = "chickenthighspack.png",
+		}
+	},
+
+	["chickenwingspack"] = {
+		label = "Chicken wings Pack",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken wings Pack Ready For Delivery",
+		client = {
+			image = "chickenwingspack.png",
+		}
+	},
+
+	["chickenbreastpack"] = {
+		label = "Chicken Breast Pack",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken Breast Pack Ready For Delivery",
+		client = {
+			image = "chickenbreastpack.png",
+		}
+	},
+
+	["chickenlegspack"] = {
+		label = "Chicken Legs Pack",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken Legs Pack Ready For Delivery",
+		client = {
+			image = "chickenlegspack.png",
+		}
+	},
+
+	["pluckedchicken"] = {
+		label = "Plucked Chicken",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Plucked Chicken Ready For Processing",
+		client = {
+			image = "pluckedchicken.png",
+		}
+	},
+
+	["foodpackaging"] = {
+		label = "Food Packaging",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Packaging Used For Raw Foods",
+		client = {
+			image = "foodpackaging.png",
+		}
+	},
+
+	["chickenbreast"] = {
+		label = "Chicken Breast",
+		weight = 200,
+		stack = true,
+		close = true,
+		description = "Fresh Chicken Breast Ready For Packing",
+		client = {
+			image = "chickenbreast.png",
+		}
+	},
+
+```
 
 

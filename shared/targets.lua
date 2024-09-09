@@ -1,6 +1,5 @@
 local TargetType = Config.CoreSettings.Target.Type
 
-
 for k,v in pairs(Config.InteractionLocations.JobAreas) do
     if TargetType == 'qb' then
         exports['qb-target']:AddBoxZone(v.name, v.coords, v.width, v.height, {
