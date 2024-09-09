@@ -14,7 +14,7 @@ Config = {}
 --Below you can change multiple options to suit your server needs.
 
 
-Config.DebugPoly = true -- displays polyzone locations
+Config.DebugPoly = false -- displays polyzone locations
 
 
 --Blip Settings
@@ -24,7 +24,7 @@ Config.Blips = {
 
 Config.CoreSettings = {
     Job = {
-        Name = 'unemployed', -- name of job in core/shared/jobs.lua
+        Name = 'butcher', -- name of job in core/shared/jobs.lua
     },
     Target = {
         Type = 'qb', -- target script name support for qb-target and ox_target 
@@ -64,13 +64,13 @@ Config.CoreSettings = {
 Config.InteractionLocations = {
     --name must be unique, size is for ox_target only, job must match job in core and in Cofig.CoreSettings.Job.Name
     JobAreas = {
-        { name = 'butcherduty',                 coords = vector3(-70.16, 6256.38, 31.2),    size =  vec3(0.5,0.5,0.5), width = 0.5, height = 0.5, heading = 31.0,   minz = 31.0, maxz = 31.5, icon = 'fa-solid fa-clipboard',           label = 'Toggle Duty',               event = 'lusty94_butcher:client:ToggleDuty',           job = nil, distance = 1.5, },
-        { name = 'butcherclothing',             coords = vector3(-75.64, 6250.66, 31.09),   size =  vec3(5.0,1.0,2.0), width = 1.0, height = 5.0, heading = 120.14, minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-shirt',               label = 'Change Clothing',           event = 'lusty94_butcher:client:changeClothes',        job = nil, distance = 1.5, },
-        { name = 'butcherpickchicken',          coords = vector3(-69.06, 6249.45, 30.92),   size =  vec3(2.0,2.0,2.0), width = 2.0, height = 2.0, heading = 300.27, minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Pick Fresh Chicken',        event = 'lusty94_butcher:client:PickChicken',          job = nil, distance = 1.5, },
-        { name = 'butcherpluckchicken',         coords = vector3(-89.33, 6234.58, 31.33),   size =  vec3(3.0,1.5,1.0), width = 1.5, height = 3.0, heading = 120.0,  minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Pluck Fresh Chicken',       event = 'lusty94_butcher:client:PluckChicken',         job = nil, distance = 1.5, },
-        { name = 'butcherpreparechicken',       coords = vector3(-79.03, 6228.83, 31.08),   size =  vec3(2.5,2.0,1.0), width = 2.5, height = 2.0, heading = 123.13, minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Process Plucked Chicken',   event = 'lusty94_butcher:client:ProcessChicken',       job = nil, distance = 1.5, },
-        { name = 'butcherprocesschicken',       coords = vector3(-99.79, 6210.99, 31.03),   size =  vec3(2.5,2.0,1.0), width = 2.5, height = 2.0, heading = 43.63,  minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Prepare Processed Chicken', event = 'lusty94_butcher:client:ProcessChickenMenu',   job = nil, distance = 1.5, },
-        { name = 'butcherpackchicken',          coords = vector3(-103.98, 6206.8, 31.03),   size =  vec3(2.5,2.0,1.0), width = 2.5, height = 2.0, heading = 43.63,  minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Pack Chicken Products',     event = 'lusty94_butcher:client:PackChickenMenu',      job = nil, distance = 1.5, },
+        { name = 'butcherduty',                 coords = vector3(-70.16, 6256.38, 31.2),    size =  vec3(0.5,0.5,0.5), width = 0.5, height = 0.5, heading = 31.0,   minz = 31.0, maxz = 31.5, icon = 'fa-solid fa-clipboard',           label = 'Toggle Duty',               event = 'lusty94_butcher:client:ToggleDuty',           job = 'butcher', distance = 1.5, },
+        { name = 'butcherclothing',             coords = vector3(-75.64, 6250.66, 31.09),   size =  vec3(5.0,1.0,2.0), width = 1.0, height = 5.0, heading = 120.14, minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-shirt',               label = 'Change Clothing',           event = 'lusty94_butcher:client:changeClothes',        job = 'butcher', distance = 1.5, },
+        { name = 'butcherpickchicken',          coords = vector3(-69.06, 6249.45, 30.92),   size =  vec3(2.0,2.0,2.0), width = 2.0, height = 2.0, heading = 300.27, minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Pick Fresh Chicken',        event = 'lusty94_butcher:client:PickChicken',          job = 'butcher', distance = 1.5, },
+        { name = 'butcherpluckchicken',         coords = vector3(-89.33, 6234.58, 31.33),   size =  vec3(3.0,1.5,1.0), width = 1.5, height = 3.0, heading = 120.0,  minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Pluck Fresh Chicken',       event = 'lusty94_butcher:client:PluckChicken',         job = 'butcher', distance = 1.5, },
+        { name = 'butcherpreparechicken',       coords = vector3(-79.03, 6228.83, 31.08),   size =  vec3(2.5,2.0,1.0), width = 2.5, height = 2.0, heading = 123.13, minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Process Plucked Chicken',   event = 'lusty94_butcher:client:ProcessChicken',       job = 'butcher', distance = 1.5, },
+        { name = 'butcherprocesschicken',       coords = vector3(-99.79, 6210.99, 31.03),   size =  vec3(2.5,2.0,1.0), width = 2.5, height = 2.0, heading = 43.63,  minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Prepare Processed Chicken', event = 'lusty94_butcher:client:ProcessChickenMenu',   job = 'butcher', distance = 1.5, },
+        { name = 'butcherpackchicken',          coords = vector3(-103.98, 6206.8, 31.03),   size =  vec3(2.5,2.0,1.0), width = 2.5, height = 2.0, heading = 43.63,  minz = 30.0, maxz = 32.0, icon = 'fa-solid fa-hand-point-up',       label = 'Pack Chicken Products',     event = 'lusty94_butcher:client:PackChickenMenu',      job = 'butcher', distance = 1.5, },
     },
 }
 
