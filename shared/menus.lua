@@ -104,62 +104,6 @@ lib.registerContext({
 })
 
 
-local cashSymbol = Config.Selling.CashSymbol
-
-lib.registerContext({
-    id = 'SellMenuButcher',
-    title = 'Butcher Sales',
-    options = {
-      {
-        title = 'Sell Chicken Breast Pack',
-        description = cashSymbol..Config.Selling.Items.ChickenBreast.Price..' each',
-        icon = ItemImage('chickenbreastpack'),
-        image = ItemImage('chickenbreastpack'),
-        event = 'lusty94_butcher:client:SellItems',
-        args = 1,
-        arrow = true,
-      },
-      {
-        title = 'Sell Chicken Thighs Pack',
-        description = cashSymbol..Config.Selling.Items.ChickenThighs.Price..' each',
-        icon = ItemImage('chickenthighspack'),
-        image = ItemImage('chickenthighspack'),
-        event = 'lusty94_butcher:client:SellItems',
-        args = 2,
-        arrow = true,
-      },
-      {
-        title = 'Sell Chicken Wings Pack',
-        description = cashSymbol..Config.Selling.Items.ChickenWings.Price..' each',
-        icon = ItemImage('chickenwingspack'),
-        image = ItemImage('chickenwingspack'),
-        event = 'lusty94_butcher:client:SellItems',
-        args = 3,
-        arrow = true,
-      },
-      {
-        title = 'Sell Chicken Drumsticks Pack',
-        description = cashSymbol..Config.Selling.Items.ChickenDrumsticks.Price..' each',
-        icon = ItemImage('chickendrumstickspack'),
-        image = ItemImage('chickendrumstickspack'),
-        event = 'lusty94_butcher:client:SellItems',
-        args = 4,
-        arrow = true,
-      },
-      
-      {
-        title = 'Sell Chicken Legs Pack',
-        description = cashSymbol..Config.Selling.Items.ChickenLegs.Price..' each',
-        icon = ItemImage('chickenlegspack'),
-        image = ItemImage('chickenlegspack'),
-        event = 'lusty94_butcher:client:SellItems',
-        args = 5,
-        arrow = true,
-      },
-      
-    }
-})
-
 
 
 
@@ -171,8 +115,4 @@ end)
 
 RegisterNetEvent('lusty94_butcher:client:PackChickenMenu', function()
     lib.showContext('PackMenuButcher')
-end)
-
-RegisterNetEvent('lusty94_butcher:client:SellChickenMenu', function()
-    lib.showContext('SellMenuButcher')
 end)

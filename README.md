@@ -1,27 +1,24 @@
 ## Lusty94_Butcher
 
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-PLEASE MAKE SURE TO READ THIS ENTIRE FILE AS IT COVERS SOME IMPORTANT INFORMATION
-
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
-======================================
-SCRIPT SUPPORT VIA DISCORD: https://discord.gg/BJGFrThmA8
-======================================
+
+## Script Support
+
+- Script support is via Discord for PAID resources ONLY: https://discord.gg/BJGFrThmA8
+
 
 
 ## FEATURES
 
 - Pick and process fresh chicken into various products
+- Input slider allows for multi processing
 - Sell your items for cash
 - Extensive config file to make multiple changes
-- Secure events to prevent exploits and abuse
 - Change core settings to suit your server
-- Support for ANY MLO or building - moveable target locations
+- Support for ANY MLO or building
 
 
 
@@ -38,19 +35,30 @@ SCRIPT SUPPORT VIA DISCORD: https://discord.gg/BJGFrThmA8
 
 ## INSTALLATION
 
-- Add the ##ITEMS snippet below into your core/shared/items.lua file - ox_inventory users place the snippet in inventory/data/items.lua
-- Add the ##JOB snippet below to your core/shared/jobs.lua
-- Add all .png images inside [images] folder into your inventory/html/images folder - ox_inventory users place images inside inventory/web/images
-- Add your own methods of obtaining the butcher job - perhaps city hall?
+- Add the ##ITEMS snippet below into your items.lua file
+- Add the ##JOB snippet below to your jobs.lua
+- Add all .png images inside [images] folder into your inventory/images folder
+- Add your own methods of obtaining the butcher job at city hall or similair
+
+
+
 
 ## JOB
 
+```
+
+    butcher = { 
+		label = 'Butcher', 
+		defaultDuty = false, 
+		offDutyPay = false, 
+		grades = { 
+			['0'] = { name = 'Factory Worker', payment = 50 },
+		},
+	},
 
 ```
 
-    butcher = { label = 'Butcher', defaultDuty = false, offDutyPay = false, grades = { ['0'] = { name = 'Factory Worker', payment = 50 } } },
 
-```
 
 
 ## QB-CORE ITEMS
@@ -250,5 +258,3 @@ SCRIPT SUPPORT VIA DISCORD: https://discord.gg/BJGFrThmA8
 	},
 
 ```
-
-

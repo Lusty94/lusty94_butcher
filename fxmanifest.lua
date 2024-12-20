@@ -8,7 +8,7 @@ name "lusty94_butcher"
 
 description 'Butcher Job Script For QB Core'
 
-version '2.0.1'
+version '2.1.0'
 
 lua54 'yes'
 
